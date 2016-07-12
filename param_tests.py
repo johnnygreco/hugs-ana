@@ -5,7 +5,8 @@ from toolbox.utils import ds9view
 
 imfile = 'deepCoadd_HSC-I_9348_8-6.fits'
 
-config = {'DETECT_MINAREA'  : 5,
+config = {'PARAMETERS_NAME' : 'params',
+          'DETECT_MINAREA'  : 5,
           'DETECT_THRESH'   : 1.5, 
           'ANALYSIS_THRESH' : 1.5}
 

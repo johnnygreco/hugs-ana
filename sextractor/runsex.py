@@ -32,15 +32,14 @@ def runsex(imagefile, config='default.sex', cat='hunt4udgs.cat',
     if os.getcwd().split('/')[-1] != 'sextractor':
         os.chdir(os.getcwd()+'/sextractor')
 
-    cmd = ['sex', '-c', config, imdir+imagefile]
-
-    cmd.append('-CATALOG_NAME '+outdir+'/'+cat)
+    cmd = 'sex -c '+config+' '+imdir+imagefile
+    cmd += ' -CATALOG_NAME '+outdir+'/'+cat
 
     for key, val in kwargs.iteritems():
-        cmd.append('-'+key+' '+str(val))
+        cmd += ' -'+key+' '+str(val)
 
-    print('running:', ' '.join(cmd))
-    subprocess.call(cmd)
+    print('running:', cmd)
+    subprocess.call(cmd, shell=True)
 
     print('making ds9 regions file')
     sexout_to_ds9reg(outdir+'/'+cat)
