@@ -2,15 +2,16 @@
 from __future__ import print_function
 __all__ = ['runsex']
 
-def runsex(imagefile, config='hunt4udgs.sex', cat='hunt4udgs.cat', 
-           outdir='../../data/sexout', **kwargs):
+def runsex(imagefile, config='default.sex', cat='hunt4udgs.cat', 
+           outdir='../../data/sexout', imdir='../../data/HSC/', **kwargs):
     """
     Run sextractor and make ds9 regions file from catalog.
 
     Parameters
     ----------
     imagefile : string
-        Full path and file name to image fits file.
+        Image file name. If imdir not given, 
+        the file must be in the HSC image directory. 
     config : string, optional
         Sextractor configure file name. 
         Must be in sextractor directory. 
@@ -18,6 +19,8 @@ def runsex(imagefile, config='hunt4udgs.sex', cat='hunt4udgs.cat',
         Catalog name. Will be written to outdir.
     outdir :  string, optinal
         Output directory (the catalog is written here).
+    imdir : string, optional
+        The image directory.
     **kwargs : dict, optional
         Any sextractor config parameter. 
     """
@@ -29,7 +32,7 @@ def runsex(imagefile, config='hunt4udgs.sex', cat='hunt4udgs.cat',
     if os.getcwd().split('/')[-1] != 'sextractor':
         os.chdir(os.getcwd()+'/sextractor')
 
-    cmd = ['sex', '-c', config, imagefile]
+    cmd = ['sex', '-c', config, imdir+imagefile]
 
     cmd.append('-CATALOG_NAME '+outdir+'/'+cat)
 
@@ -42,4 +45,4 @@ def runsex(imagefile, config='hunt4udgs.sex', cat='hunt4udgs.cat',
     print('making ds9 regions file')
     sexout_to_ds9reg(outdir+'/'+cat)
 
-    os.chdir(os.getcwd())
+    os.chdir('..')
