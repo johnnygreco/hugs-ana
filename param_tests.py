@@ -5,7 +5,7 @@ from toolbox.utils import ds9view
 
 imfile = 'deepCoadd_HSC-I_9348_8-6.fits'
 
-alpha = 5.0
+alpha = 10.
 size = 9
 convfile = kernals.exp(size, alpha, write=True)
 
