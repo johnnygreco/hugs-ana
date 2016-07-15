@@ -38,11 +38,13 @@ def runsex(imagefile, sexfile='default.sex', cat='hunt4udgs.cat', **kwargs):
     # get the run directory and make sure sexin
     # and sexout are good to go
     rundir = os.getcwd()
+
+    indir = os.path.join(rundir, 'sexin')
+    assert os.path.isdir(indir), 'must have input images in sexin/'
+
     outdir = os.path.join(rundir, 'sexout')
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
-    indir = os.path.join(rundir, 'sexin')
-    assert os.path.isdir(indir), 'must have input images in sexin/'
 
     # run from config directory
     filedir = os.path.dirname(os.path.abspath(__file__))
