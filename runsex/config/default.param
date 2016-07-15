@@ -1,6 +1,6 @@
-NUMBER                   Running object number                                    
-EXT_NUMBER               FITS extension number                                    
-FLUX_ISO                 Isophotal flux                                            [count]
+#NUMBER                   Running object number                                    
+#EXT_NUMBER               FITS extension number                                    
+#FLUX_ISO                 Isophotal flux                                            [count]
 #FLUXERR_ISO              RMS error for isophotal flux                              [count]
 #MAG_ISO                  Isophotal magnitude                                       [mag]
 #MAGERR_ISO               RMS error for isophotal magnitude                         [mag]
@@ -22,7 +22,7 @@ FLUX_ISO                 Isophotal flux                                         
 #MAGERR_PETRO             RMS error for PETROsian magnitude                         [mag]
 #FLUX_BEST                Best of FLUX_AUTO and FLUX_ISOCOR                         [count]
 #FLUXERR_BEST             RMS error for BEST flux                                   [count]
-MAG_BEST                 Best of MAG_AUTO and MAG_ISOCOR                           [mag]
+#MAG_BEST                 Best of MAG_AUTO and MAG_ISOCOR                           [mag]
 #MAGERR_BEST              RMS error for MAG_BEST                                    [mag]
 #FLUX_WIN                 Gaussian-weighted flux                                    [count]
 #FLUXERR_WIN              RMS error for WIN flux                                    [count]
@@ -53,12 +53,12 @@ MAG_BEST                 Best of MAG_AUTO and MAG_ISOCOR                        
 #YPEAK_WORLD              World-y coordinate of the brightest pixel                 [deg]
 #ALPHAPEAK_SKY            Right ascension of brightest pix (native)                 [deg]
 #DELTAPEAK_SKY            Declination of brightest pix (native)                     [deg]
-ALPHAPEAK_J2000          Right ascension of brightest pix (J2000)                  [deg]
-DELTAPEAK_J2000          Declination of brightest pix (J2000)                      [deg]
+#ALPHAPEAK_J2000          Right ascension of brightest pix (J2000)                  [deg]
+#DELTAPEAK_J2000          Declination of brightest pix (J2000)                      [deg]
 #ALPHAPEAK_B1950          Right ascension of brightest pix (B1950)                  [deg]
 #DELTAPEAK_B1950          Declination of brightest pix (B1950)                      [deg]
-X_IMAGE                  Object position along x                                   [pixel]
-Y_IMAGE                  Object position along y                                   [pixel]
+#X_IMAGE                  Object position along x                                   [pixel]
+#Y_IMAGE                  Object position along y                                   [pixel]
 #X_IMAGE_DBL              Object position along x (double precision)                [pixel]
 #Y_IMAGE_DBL              Object position along y (double precision)                [pixel]
 #X_FOCAL                  Barycenter position along focal-plane x axis             
@@ -79,9 +79,9 @@ Y_IMAGE                  Object position along y                                
 #X2_WORLD                 Variance along X-WORLD (alpha)                            [deg**2]
 #Y2_WORLD                 Variance along Y-WORLD (delta)                            [deg**2]
 #XY_WORLD                 Covariance between X-WORLD and Y-WORLD                    [deg**2]
-CXX_IMAGE                Cxx object ellipse parameter                              [pixel**(-2)]
-CYY_IMAGE                Cyy object ellipse parameter                              [pixel**(-2)]
-CXY_IMAGE                Cxy object ellipse parameter                              [pixel**(-2)]
+#CXX_IMAGE                Cxx object ellipse parameter                              [pixel**(-2)]
+#CYY_IMAGE                Cyy object ellipse parameter                              [pixel**(-2)]
+#CXY_IMAGE                Cxy object ellipse parameter                              [pixel**(-2)]
 #CXX_WORLD                Cxx object ellipse parameter (WORLD units)                [deg**(-2)]
 #CYY_WORLD                Cyy object ellipse parameter (WORLD units)                [deg**(-2)]
 #CXY_WORLD                Cxy object ellipse parameter (WORLD units)                [deg**(-2)]

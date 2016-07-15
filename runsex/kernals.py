@@ -4,7 +4,7 @@ import numpy as np
 
 __all__ = ['write_kern', 'exp']
 
-def write_kern(kern, fn, norm=True, comment=None, sexdir='sextractor/', fmt='%.8g'):
+def write_kern(kern, fn, norm=True, comment=None, fmt='%.8g'):
     """
     Write convolution kernel file for sextractor.
 
@@ -18,15 +18,21 @@ def write_kern(kern, fn, norm=True, comment=None, sexdir='sextractor/', fmt='%.8
         If True, kernel is to be normalized.
     comment : string, optional
         Comment for the convolution file.
-    sexdir : string, optional
-        Path to sextractor directory. 
     fmt : string, optional
         Numpy savetxt output format.
     """
+    import os
+
+    # must save in the runsex/config directory
+    filedir = os.path.dirname(os.path.abspath(__file__))
+    outdir = os.path.join(filedir, 'config')
+
     header = 'CONV NORM' if norm else 'CONV'
     if comment is not None:
         header += '\n'+comment
-    np.savetxt(sexdir+fn, kern, header=header, comments='', fmt=fmt)
+
+    outfile = os.path.join(outdir, fn)
+    np.savetxt(outfile, kern, header=header, comments='', fmt=fmt)
 
 def exp(size=9, alpha=5.0, write=False, **kwargs):
     """
