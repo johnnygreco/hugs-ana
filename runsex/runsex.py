@@ -62,6 +62,6 @@ def runsex(imagefile, sexfile='default.sex', cat='hunt4udgs.cat', **kwargs):
     subprocess.call(cmd, shell=True)
 
     print('making ds9 regions file')
-    sexout_to_ds9reg(outdir+'/'+cat)
+    sexout_to_ds9reg(catfile)
 
     os.chdir(rundir)
