@@ -5,6 +5,8 @@ DELTA_J2000              Declination of barycenter (J2000)                      
 
 MAG_AUTO                 Kron-like elliptical aperture magnitude                   [mag]
 
+FWHM_IMAGE               FWHM assuming a gaussian core                             [pixel]
+
 CXX_IMAGE                Cxx object ellipse parameter                              [pixel**(-2)]
 CYY_IMAGE                Cyy object ellipse parameter                              [pixel**(-2)]
 CXY_IMAGE                Cxy object ellipse parameter                              [pixel**(-2)]

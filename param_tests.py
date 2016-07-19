@@ -3,26 +3,37 @@
 from runsex import runsex, kernals
 from toolbox.utils import ds9view
 
-#imdir = 'deepCoadd_9348_7-6_HSC-I/'
-imdir = 'deepCoadd_9348_8-6_HSC-I/'
+band = 'I'
+tract = '9348'
+patch = '7-6'
 
-imfile = imdir+'img.fits'
+imdir = 'deepCoadds/HSC-'+band+'/'+tract+'/'+patch+'/'
 
-alpha = 30. # ~5"/0.168"/pixel
+imfile = imdir+'img_x_bad.fits'
+
+alpha = 10. 
 size = 11
 convfile = kernals.exp(size, alpha, write=True)
 
 config = {'PARAMETERS_NAME' : 'myparams',
           'FILTER_NAME'     : convfile,
-          'DEBLEND_NTHRESH' : 1,
-          'DEBLEND_MINCONT' : 1,
-          'DETECT_MINAREA'  : 5,
-          'DETECT_THRESH'   : 1.5, 
-          'CLEAN_PARAM'     : 0.5,
-          'ANALYSIS_THRESH' : 1.5,
+          'THRESH_TYPE'     : 'RELATIVE',
+          'DEBLEND_NTHRESH' : 6,
+          'DEBLEND_MINCONT' : 0.008,
+          'DETECT_MINAREA'  : 10,
+          'DETECT_THRESH'   : 2.4, 
+          'ANALYSIS_THRESH' : 2.4,
+          'BACK_SIZE'       : 128.0,
+          'CLEAN_PARAM'     : 1,
           'MAG_ZEROPOINT'   : 27.0, 
-          'PIXEL_SCALE'     : 0.168}
+          'PIXEL_SCALE'     : 0.168,
+          'SEEING_FWHM'     : 0.7, 
+          'WEIGHT_IMAGE'    : imdir+'sig.fits',
+          'WEIGHT_TYPE'     : 'MAP_RMS', 
+          }
 
-runsex(imfile, **config)
+catfile = 'HSC-'+band+'_'+tract+'_'+patch+'.cat'
 
-ds9view('sexin/'+imfile, 'sexout/hunt4udgs.reg', mecube=True)
+runsex(imfile, cat=catfile, **config)
+
+ds9view('sexin/'+imfile, 'sexout/'+catfile[:-4]+'.reg', mecube=True)

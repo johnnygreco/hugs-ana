@@ -56,6 +56,8 @@ def runsex(imagefile, sexfile='default.sex', cat='hunt4udgs.cat', **kwargs):
     cmd += ' -CATALOG_NAME '+catfile
 
     for key, val in kwargs.iteritems():
+        if 'IMAGE' in key:
+            val = os.path.join(indir, val)
         cmd += ' -'+key+' '+str(val)
 
     print('running:', '\n'+cmd+'\n')
