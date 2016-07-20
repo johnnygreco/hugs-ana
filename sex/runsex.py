@@ -4,7 +4,7 @@ from __future__ import print_function
 __all__ = ['runsex']
 
 def runsex(imagefile, sexfile='default.sex', cat='hunt4udgs.cat',
-        make_ds9reg=False, relpath='', **kwargs):
+           make_ds9reg=False, relpath='', **kwargs):
     """
     Run sextractor and option to make ds9 regions file from catalog.
 
@@ -25,18 +25,16 @@ def runsex(imagefile, sexfile='default.sex', cat='hunt4udgs.cat',
         sextraactor catalog.
     relpath : string, optional
         Relative path from within the sexin/sexout 
-        directories. See note (iii).
+        directories. See note (ii).
     **kwargs : dict, optional
         Any sextractor config parameter. 
 
     Notes
     -----
-      i) All the sextractor configuration files must be in the
-         sex/config directory. 
-     ii) The input images must be in sexin, which must be in the same
-         directory as the script that calls runsex
-    iii) Input files are assumed to be in sexin/relpath, and output files will
-         be saved to sexout/relpath, which will be created if it doesn't exist. 
+     i) All the sextractor configuration files must be in the
+        sex/config directory. 
+    ii) Input files are assumed to be in sexin/relpath, and output files will
+        be saved to sexout/relpath, which will be created if it doesn't exist. 
     """
     import os
     import subprocess
