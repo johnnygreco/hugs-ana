@@ -55,7 +55,7 @@ def sig_to_wts(sigfile, wfile='wts.fits', sexpath=True):
     print('writing', wfile)
     fits.writeto(wfile, weights, sigfits.header, clobber=True)
 
-def wts_with_badpix(badfile, wfile, wnewfile='wts_bad.fits', 
+def wts_with_badpix(wfile, badfile, wnewfile='wts_bad.fits', 
                     flagval=-100.0, sexpath=True):
     """
     Flag bad pixels in the weight image for sextractor.

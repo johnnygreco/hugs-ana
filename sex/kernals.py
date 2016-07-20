@@ -37,7 +37,7 @@ def write_kern(kern, fn, norm=True, comment=None, fmt='%.8f'):
 def exp(size, alpha, norm_array=False, write=False, **kwargs):
     """
     Generate 2D, radially symmetric exponential kernal for sextractor, 
-    produced by sampling at the midpoints of pixel.
+    produced by sampling at the midpoints of each pixel.
 
     Parameters
     ----------
@@ -86,7 +86,7 @@ def exp(size, alpha, norm_array=False, write=False, **kwargs):
 def gauss(size, width, width_type='fwhm', norm_array=False, write=False, **kwargs):
     """
     Generate a 2D radially symmetric Gaussian kernel for sextractor,
-    produced by sampling at the midpoints of pixel.
+    produced by sampling at the midpoints of each pixel.
 
     Parameters
     ----------
@@ -141,7 +141,7 @@ def gauss(size, width, width_type='fwhm', norm_array=False, write=False, **kwarg
     if write:
         fn = 'gauss_{0}_{1}x{1}.conv'.format(fwhm, size)
         comment = '# {0}x{0} convolution mask '.format(size)
-        comment += 'of an Gaussian with fwhm = {} pixels'.format(fwhm)
+        comment += 'of a Gaussian with fwhm = {} pixels'.format(fwhm)
         write_kern(kern, fn, comment=comment, **kwargs)
         return fn
     else:
