@@ -5,7 +5,7 @@ Some functions to manipulate fits files.
 
 from __future__ import print_function
 
-__all__ = ['sig_to_weight']
+__all__ = ['sig_to_wts', 'wts_with_badpix']
 
 import os
 from astropy.io import fits
