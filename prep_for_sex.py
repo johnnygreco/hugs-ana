@@ -9,7 +9,7 @@ from __future__ import print_function
 import os
 from utils import prep_for_sex
 
-imdir = 'sexin/deepCoadds/HSC-I'
+imdir = 'sexin/HSC-I'
 
 tracts = os.listdir(imdir)
 

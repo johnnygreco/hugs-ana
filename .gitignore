@@ -3,6 +3,6 @@
 .*.swp
 .dropbox.attr
 .ipynb_checkpoints
-.conv
+*.conv
 sexin
 sexout

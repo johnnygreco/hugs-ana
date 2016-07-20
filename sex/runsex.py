@@ -3,7 +3,7 @@ from __future__ import print_function
 
 __all__ = ['runsex']
 
-def runsex(imagefile, sexfile='default.sex', cat='hunt4udgs.cat',
+def runsex(imagefile, sexfile='default.sex', cat='sex.cat',
            make_ds9reg=False, relpath='', **kwargs):
     """
     Run sextractor and option to make ds9 regions file from catalog.

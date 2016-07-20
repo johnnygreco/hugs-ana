@@ -108,10 +108,10 @@ def prep_for_sex(tract, patch, band='I'):
     Notes
     -----
     Assumes the following file structure:
-    {sextractor in/out dirs}/deepCoadds/HSC-band/tract/patch
+    {sextractor in/out dirs}/HSC-band/tract/patch
     """
     patch_label = patch[0]+'-'+patch[-1]
-    path = 'deepCoadds/HSC-'+band.upper()+'/'+str(tract)+'/'+patch_label+'/'
+    path = 'HSC-'+band.upper()+'/'+str(tract)+'/'+patch_label+'/'
     sigfile = path+'sig.fits'
     badfile = path+'bad.fits'
     wfile = path+'wts.fits'
