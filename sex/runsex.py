@@ -3,10 +3,9 @@ from __future__ import print_function
 
 __all__ = ['runsex']
 
-def runsex(imagefile, sexfile='default.sex', cat='sex.cat',
-           make_ds9reg=False, relpath='', **kwargs):
+def runsex(imagefile, sexfile='default.sex', cat='sex.cat', relpath='', **kwargs):
     """
-    Run sextractor and option to make ds9 regions file from catalog.
+    Run sextractor.
 
     Parameters
     ----------
@@ -20,9 +19,6 @@ def runsex(imagefile, sexfile='default.sex', cat='sex.cat',
     cat : string, optional
         Catalog name. Will be written to sexout 
         directory in the run directory.
-    make_ds9reg : bool, optional
-        If True, make a ds9 regions file with the
-        sextraactor catalog.
     relpath : string, optional
         Relative path from within the sexin/sexout 
         directories. See note (ii).
@@ -38,7 +34,6 @@ def runsex(imagefile, sexfile='default.sex', cat='sex.cat',
     """
     import os
     import subprocess
-    from toolbox.utils import sexout_to_ds9reg
 
     # get the run directory and make sure sexin
     # and sexout are good to go
@@ -78,9 +73,5 @@ def runsex(imagefile, sexfile='default.sex', cat='sex.cat',
 
     print('running:', '\n'+cmd+'\n')
     subprocess.call(cmd, shell=True)
-
-    if make_ds9reg:
-        print('making ds9 regions file')
-        sexout_to_ds9reg(catfile)
 
     os.chdir(rundir)

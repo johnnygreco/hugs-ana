@@ -1,15 +1,16 @@
 
-checkimg_names = 'sex_bckgrd.fits,sex_filter.fits,sex_aps.fits,sex_seg.fits,sex_objs.fits'
+checkimg_names = 'sex-background.fits,sex-filtered.fits,'
+checkimg_names += 'sex-apertures.fits,sex-seg.fits,sex-objects.fits'
 checkimg_type = 'BACKGROUND,FILTERED,APERTURES,SEGMENTATION,OBJECTS'
 
 config = {'PARAMETERS_NAME' : 'myparams',
           'FILTER'          : 'Y',
           'THRESH_TYPE'     : 'RELATIVE',
-          'DEBLEND_NTHRESH' : 16,
-          'DEBLEND_MINCONT' : 0.01,
+          'DEBLEND_NTHRESH' : 32,
+          'DEBLEND_MINCONT' : 0.005,
           'DETECT_MINAREA'  : 800,
-          'DETECT_THRESH'   : 1.,
-          'ANALYSIS_THRESH' : 1.,
+          'DETECT_THRESH'   : 0.8,
+          'ANALYSIS_THRESH' : 0.8,
           'BACK_SIZE'       : 100.0,
           'BACK_FILTERSIZE' : 3,
           'CLEAN'           : 'Y',

@@ -13,3 +13,6 @@ CXY_IMAGE                Cxy object ellipse parameter                           
 A_IMAGE                  Profile RMS along major axis                              [pixel]
 B_IMAGE                  Profile RMS along minor axis                              [pixel]
 THETA_IMAGE              Position angle (CCW/x)                                    [deg]
+
+ISO0                     Isophotal area at level 0                                 [pixel**2]
+ISO1                     Isophotal area at level 1                                 [pixel**2]
