@@ -1,9 +1,7 @@
 #!/usr/bin/env python 
 
-from astropy.convolution import Ring2DKernel, convolve
-from pyraf import iraf
+from imtools import rmedian
 
-imdir = '../data/HSC/'
-imfile = 'deepCoadd_HSC-I_9348_8-6.fits'
-
-iraf.rmedian(imdir+imfile+'[1]', imdir+'filtered.fits')
+imdir = 'sexin/HSC-I/9590/1-4/'
+imfile = imdir+'img.fits'
+rmedian(imfile, imdir+'rmedian.fits', 5, 7)

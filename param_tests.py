@@ -9,9 +9,13 @@ patch = '1-4'
 
 imfile = 'img.fits'
 
-fwhm = 15
-size = 31
-convfile = kernals.gauss(size, fwhm, write=True)
+#fwhm = 15
+#size = 31
+#convfile = kernals.gauss(size, fwhm, write=True)
+
+r_inner = 4
+width = 2
+convfile = kernals.ring(r_inner, width, write=True)
 
 config['FILTER_NAME'] = convfile
 

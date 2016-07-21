@@ -1,6 +1,6 @@
 
 """
-Some functions to manipulate fits files.
+Some functions to prep fits images for SExtractor.
 """
 
 from __future__ import print_function

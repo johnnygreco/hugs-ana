@@ -7,13 +7,14 @@ Prepare images for SExtractor.
 from __future__ import print_function
 
 import os
-from utils import prep_for_sex
+from sex import imprep
 
 imdir = 'sexin/HSC-I'
 
-tracts = os.listdir(imdir)
+tracts = [t for t in os.listdir(imdir) if t[0]!='.']
 
 for t in tracts:
-    patches = os.listdir(os.path.join(imdir, t))
+    pdir = os.path.join(imdir, t)
+    patches = [p for p in os.listdir(pdir) if p[0]!='.']
     for p in patches:
-        prep_for_sex(t, p)
+        imprep.prep_for_sex(t, p)
