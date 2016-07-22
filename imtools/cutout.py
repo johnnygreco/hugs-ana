@@ -48,8 +48,22 @@ def get_cutout(data, ra, dec, header, size=300, save_fn=None):
         fits.writeto(save_fn, cutout.data, header, clobber=True)
 
 if __name__=='__main__':
+    import argparse
     from astropy.io import fits
-    file = '../sexin/group_3765/HSC-I_9347_1-8_img.fits'
-    f = fits.open(file)[0]
-    cutout = get_cutout(f.data, 179.78125, -0.0231389, 
-                        f.header, size=300, save_fn='test.fits')
+    parser = argparse.ArgumentParser(description='Get cutout of fits image')
+    parser.add_argument('file', type=str, help='file name')
+    parser.add_argument('ra', type=float, help='central ra of cutout')
+    parser.add_argument('dec', type=float, help='central dec of cutout')
+    parser.add_argument('-s', '--size', help='size of cutout', default=300)
+    parser.add_argument('-w', '--write', help='save file name', default=None)
+    args = parser.parse_args()
+    f = fits.open(args.file)[0]
+    cutout = get_cutout(f.data, args.ra, args.dec, f.header, size=args.size, save_fn=args.write)
+    if args.write is None:
+        import matplotlib.pyplot as plt
+        from toolbox.image import zscale
+        vmin, vmax = zscale(cutout.data)
+        plt.imshow(cutout.data, vmin=vmin, vmax=vmax, cmap=plt.cm.cubehelix_r)
+        try: import RaiseWindow
+        except: pass
+        plt.show()
