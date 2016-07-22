@@ -21,9 +21,7 @@ config = {'PARAMETERS_NAME' : 'myparams',
           'WEIGHT_IMAGE'    : 'wts_bad.fits',
           'WEIGHT_TYPE'     : 'MAP_WEIGHT',
           'WEIGHT_THRESH'   : 0.0,
-          'PHOT_APERTURES'  : '3,4,5,6,7,8,16,32',
           'PHOT_FLUXFRAC'   : 0.5,
-          'PHOT_AUTOAPERS'  : '5.0,5.0',
           'CHECKIMAGE_NAME' : checkimg_names, 
           'CHECKIMAGE_TYPE' : checkimg_type
           }

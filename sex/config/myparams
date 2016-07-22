@@ -4,6 +4,7 @@ ALPHA_J2000              Right ascension of barycenter (J2000)                  
 DELTA_J2000              Declination of barycenter (J2000)                         [deg]
 
 MAG_AUTO                 Kron-like elliptical aperture magnitude                   [mag]
+MU_MAX                   Peak surface brightness above background                  [mag * arcsec**(-2)]
 
 FWHM_IMAGE               FWHM assuming a gaussian core                             [pixel]
 
@@ -14,5 +15,9 @@ A_IMAGE                  Profile RMS along major axis                           
 B_IMAGE                  Profile RMS along minor axis                              [pixel]
 THETA_IMAGE              Position angle (CCW/x)                                    [deg]
 
+KRON_RADIUS              Kron apertures in units of A or B                        
+PETRO_RADIUS             Petrosian apertures in units of A or B  
+
 ISO0                     Isophotal area at level 0                                 [pixel**2]
-ISO1                     Isophotal area at level 1                                 [pixel**2]
+
+CLASS_STAR               S/G classifier output          
