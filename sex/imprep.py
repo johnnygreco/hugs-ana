@@ -85,7 +85,7 @@ def wts_with_badpix(wfile, badfile, wnewfile='wts_bad.fits',
     if sexpath:
         badfile = os.path.join(_get_sexpath('in'), badfile)
         wfile = os.path.join(_get_sexpath('in'), wfile)
-    wnewfile = os.path.join(os.path.dirname(wfile), wnewfile)
+        wnewfile = os.path.join(os.path.dirname(wfile), wnewfile)
     badpix = fits.getdata(badfile)
     wfits = fits.open(wfile)[0]
     wfits.data[badpix!=0] = flagval
