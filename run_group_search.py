@@ -6,14 +6,21 @@ import os
 import numpy as np
 from sex import runsex, kernals, config
 
-def run(group_id):
+def run(group_id, kernal):
     """
     Run sextractor on images associated with galaxy group.
     """
     relpath = 'group_'+str(group_id)
     imgfiles = [d for d in os.listdir('sexin/'+relpath) if 'img' in d]
     wtsfiles = [d for d in os.listdir('sexin/'+relpath) if 'wts_bad' in d]
+
+    kern_name, size, width_param = kernal
+    kern = {'gauss':kernals.gauss, 'exp':kernals.exp}[kern_name]
+    convfile = kern(size, width_param, write=True)
+
     config['CHECKIMAGE_TYPE'] = 'NONE'
+    config['FILTER_NAME'] = convfile
+
     for img_file, wts_file in zip(imgfiles, wtsfiles):
         prefix = img_file[:-8]
         config['WEIGHT_IMAGE'] = wts_file
@@ -54,12 +61,12 @@ def combine_cats(group_id, min_sep=0.7):
         # don't search objects flagged as double entries
         if mask[i]==True:
             seps = angsep(ra, dec, cat['ALPHA_J2000'], cat['DELTA_J2000'])
-            unique = seps > minsep
+            unique = seps > min_sep
             unique[i] = True # it will certainly match itself
             mask &= unique   # double entries set to False
     cat = cat[mask]
     print(len(cat), 'objects after removing double entries with min sep =',
-          minsep, 'arcsec')
+          min_sep, 'arcsec')
     cat.write(path+'master.cat', format='ascii')
 
 if __name__=='__main__':
@@ -68,8 +75,16 @@ if __name__=='__main__':
     parser.add_argument('group_id', type=int, help='galaxy group id')
     parser.add_argument('-m', '--min_sep', type=float, help='min sep btw'
     ' catalog objects in arcsec', default=0.7)
+    parser.add_argument('-k', '--kernal', nargs=3, default=['gauss', 9, 5.0],
+            help='kernal: name, size, width_param')
+    parser.add_argument('-r', '--run_only', help='only call run function',
+            action='store_true')
+    parser.add_argument('-c', '--combine_only', help='only call combine_cats function',
+            action='store_true')
     args = parser.parse_args()
-    print('searching around group', args.group_id)
-    run(args.group_id)
-    print('combining catalogs into master.cat')
-    combine_cats(args.group_id, min_sep=args.min_sep)
+    if not args.combine_only:
+        print('searching around group', args.group_id)
+        run(args.group_id, kernal=args.kernal)
+    if not args.run_only:
+        print('combining catalogs into master.cat')
+        combine_cats(args.group_id, min_sep=args.min_sep)
