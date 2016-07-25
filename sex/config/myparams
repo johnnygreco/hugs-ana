@@ -3,10 +3,17 @@ Y_IMAGE                  Object position along y                                
 ALPHA_J2000              Right ascension of barycenter (J2000)                     [deg]
 DELTA_J2000              Declination of barycenter (J2000)                         [deg]
 
-MAG_AUTO                 Kron-like elliptical aperture magnitude                   [mag]
 MU_MAX                   Peak surface brightness above background                  [mag * arcsec**(-2)]
+MU_THRESHOLD             Detection threshold above background                      [mag * arcsec**(-2)]
+
+MAG_AUTO                 Kron-like elliptical aperture magnitude                   [mag]
+MAG_ISO                  Isophotal magnitude                                       [mag]
+MAG_BEST                 Best of MAG_AUTO and MAG_ISOCOR                           [mag]
+
+FLUX_RADIUS
 
 FWHM_IMAGE               FWHM assuming a gaussian core                             [pixel]
+FWHM_WORLD               FWHM assuming a gaussian core                             [deg]
 
 CXX_IMAGE                Cxx object ellipse parameter                              [pixel**(-2)]
 CYY_IMAGE                Cyy object ellipse parameter                              [pixel**(-2)]
@@ -21,3 +28,5 @@ PETRO_RADIUS             Petrosian apertures in units of A or B
 ISO0                     Isophotal area at level 0                                 [pixel**2]
 
 CLASS_STAR               S/G classifier output          
+
+FLAGS

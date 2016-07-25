@@ -14,7 +14,10 @@ def run(group_id, kernal):
     imgfiles = [d for d in os.listdir('sexin/'+relpath) if 'img' in d]
     wtsfiles = [d for d in os.listdir('sexin/'+relpath) if 'wts_bad' in d]
 
-    kern_name, size, width_param = kernal
+    kern_name = kernal[0]
+    size = int(kernal[1])
+    width_param = float(kernal[2])
+    
     kern = {'gauss':kernals.gauss, 'exp':kernals.exp}[kern_name]
     convfile = kern(size, width_param, write=True)
 
@@ -54,7 +57,7 @@ def combine_cats(group_id, min_sep=0.7):
 
     ###############################################
     # build mask for double entries. consider 
-    # object within 0.7" (the fwhm) the same object
+    # object within min_sep arcsec the same object
     ###############################################
     mask = np.ones(len(cat), dtype=bool)
     for i, (ra, dec) in enumerate(cat['ALPHA_J2000','DELTA_J2000']):
@@ -74,7 +77,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Run sextractor on group')
     parser.add_argument('group_id', type=int, help='galaxy group id')
     parser.add_argument('-m', '--min_sep', type=float, help='min sep btw'
-    ' catalog objects in arcsec', default=0.7)
+            ' catalog objects in arcsec', default=0.7)
     parser.add_argument('-k', '--kernal', nargs=3, default=['gauss', 9, 5.0],
             help='kernal: name, size, width_param')
     parser.add_argument('-r', '--run_only', help='only call run function',
