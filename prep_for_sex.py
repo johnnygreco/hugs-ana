@@ -12,7 +12,7 @@ from sex import imprep
 groups = True
 
 if groups:
-    group_id = 3765
+    group_id = 8453
 
     imdir = 'sexin/group_'+str(group_id)+'/'
     sigfiles = [f for f in os.listdir(imdir) if 'sig' in f]

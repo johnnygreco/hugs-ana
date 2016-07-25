@@ -63,8 +63,13 @@ def combine_cats(group_id, min_sep=0.7):
     cat.write(path+'master.cat', format='ascii')
 
 if __name__=='__main__':
-    group_id = 8453
-    print('searching around group', group_id)
-    run(group_id)
+    import argparse
+    parser = argparse.ArgumentParser(description='Run sextractor on group')
+    parser.add_argument('group_id', type=int, help='galaxy group id')
+    parser.add_argument('-m', '--min_sep', type=float, help='min sep btw'
+    ' catalog objects in arcsec', default=0.7)
+    args = parser.parse_args()
+    print('searching around group', args.group_id)
+    run(args.group_id)
     print('combining catalogs into master.cat')
-    combine_cats(group_id)
+    combine_cats(args.group_id, min_sep=args.min_sep)
