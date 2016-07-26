@@ -14,8 +14,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('tract', type=str, default='9348')
 parser.add_argument('patch', type=str, default='7-6')
 parser.add_argument('-t', '--textparam', help='text parameter for ds9', 
-        type=str, default='MU_MAX')
+                    type=str, default='MU_MAX')
 parser.add_argument('-r', '--run_it', help='run search', action='store_true')
+parser.add_argument('-k', '--kernal', nargs=3, default=['gauss', 9, 5.0],
+                    help='kernal: name, size, width_param')
 args = parser.parse_args()
 
 ######################################################
@@ -25,9 +27,12 @@ band = 'I'
 tract = args.tract
 patch = args.patch[0]+'-'+args.patch[-1]
 imfile = 'img.fits'
-width_param = 10.0
-size = 21
+kern_name = args.kernal[0]
+size = int(args.kernal[1])
+width_param = float(args.kernal[2])
 convfile = kernals.exp(size, width_param, write=True)
+kern = {'gauss':kernals.gauss, 'exp':kernals.exp}[kern_name]
+convfile = kern(size, width_param, write=True)
 
 ######################################################
 # Modify config parameters
@@ -52,9 +57,7 @@ if args.run_it:
 sexin = 'sexin/'+relpath
 sexout = 'sexout/'+relpath
 table = read_sexout(sexout+'sex.cat')
-print len(table), 'objects in cat before cuts'
 table = apply_cuts(table)
-print len(table), 'objects in cat after cuts'
 
 ######################################################
 # Make ds9 reg file and view results with ds9
