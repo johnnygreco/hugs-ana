@@ -53,11 +53,11 @@ if __name__=='__main__':
     from astropy.io import fits
     parser = argparse.ArgumentParser(description='Get cutout of fits image')
     parser.add_argument('file', type=str, help='file name')
-    parser.add_argument('x', type=float, help='central x coordinate of cutout')
-    parser.add_argument('y', type=float, help='central y coordinate of cutout')
+    parser.add_argument('x', type=float, help='central x (ra or pixel) coordinate of cutout')
+    parser.add_argument('y', type=float, help='central y (dec or pixel) coordinate of cutout')
     parser.add_argument('-s', '--size', help='size of cutout', default=300)
     parser.add_argument('-w', '--write', help='save file name', default=None)
-    parser.add_argument('--no_header', help='us the header for WCS',
+    parser.add_argument('--no_header', help='no header for WCS',
             action='store_true')
     args = parser.parse_args()
     f = fits.open(args.file)[0]
@@ -73,3 +73,4 @@ if __name__=='__main__':
         try: import RaiseWindow
         except: pass
         plt.show()
+
