@@ -45,7 +45,7 @@ def get_cutout(data, coord, header=None, size=300, save_fn=None):
         return cutout
     else:
         from astropy.io import fits
-        header = cutout.wcs.to_header()
+        header = cutout.wcs.to_header() if header is not None else None
         fits.writeto(save_fn, cutout.data, header, clobber=True)
 
 if __name__=='__main__':
@@ -57,8 +57,7 @@ if __name__=='__main__':
     parser.add_argument('y', type=float, help='central y (dec or pixel) coordinate of cutout')
     parser.add_argument('-s', '--size', help='size of cutout', default=300)
     parser.add_argument('-w', '--write', help='save file name', default=None)
-    parser.add_argument('--no_header', help='no header for WCS',
-            action='store_true')
+    parser.add_argument('--no_header', help='no header for WCS', action='store_true')
     args = parser.parse_args()
     f = fits.open(args.file)[0]
     header = None if args.no_header else f.header
@@ -68,9 +67,7 @@ if __name__=='__main__':
         import matplotlib.pyplot as plt
         from toolbox.image import zscale
         vmin, vmax = zscale(cutout.data)
-        plt.imshow(cutout.data, vmin=vmin, vmax=vmax, cmap=plt.cm.cubehelix_r,
-                origin='lower')
+        plt.imshow(cutout.data, vmin=vmin, vmax=vmax, cmap=plt.cm.cubehelix_r, origin='lower')
         try: import RaiseWindow
         except: pass
         plt.show()
-
