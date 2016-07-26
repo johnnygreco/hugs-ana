@@ -54,8 +54,8 @@ if args.run_it:
 ######################################################
 # Make cuts on catalog
 ######################################################
-sexin = 'sexin/'+relpath
-sexout = 'sexout/'+relpath
+sexin = '../sexin/'+relpath
+sexout = '../sexout/'+relpath
 table = read_sexout(sexout+'sex.cat')
 table = apply_cuts(table)
 

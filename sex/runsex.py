@@ -29,20 +29,25 @@ def runsex(imagefile, sexfile='default.sex', cat='sex.cat', relpath='', **kwargs
     -----
      i) All the sextractor configuration files must be in the
         sex/config directory. 
-    ii) Input files are assumed to be in sexin/relpath, and output files will
-        be saved to sexout/relpath, which will be created if it doesn't exist. 
+    ii) Input files are assumed to be in sexin/{relpath}, and output files will
+        be saved to sexout/{relpath}, which will be created if it doesn't exist. 
     """
     import os
     import subprocess
 
-    # get the run directory and make sure sexin
-    # and sexout are good to go
+    # get the run directory 
     rundir = os.getcwd()
 
-    indir = os.path.join(rundir, os.path.join('sexin', relpath))
+    # run from config directory
+    filedir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(os.path.join(filedir, 'config'))
+
+    # make sure sexin and sexout are good to go
+    rootdir = os.path.dirname(filedir)
+    indir = os.path.join(rootdir, os.path.join('sexin', relpath))
     assert os.path.isdir(indir)
 
-    outdir = os.path.join(rundir, 'sexout')
+    outdir = os.path.join(rootdir, 'sexout')
     assert os.path.isdir(outdir)
 
     # if relpath not in sexout, create it
@@ -52,10 +57,6 @@ def runsex(imagefile, sexfile='default.sex', cat='sex.cat', relpath='', **kwargs
             if not os.path.isdir(outdir):
                 print('creating', outdir)
                 os.mkdir(outdir)
-    
-    # run from config directory
-    filedir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(os.path.join(filedir, 'config'))
 
     imfile = os.path.join(indir, imagefile)
     catfile = os.path.join(outdir, cat)
@@ -74,4 +75,5 @@ def runsex(imagefile, sexfile='default.sex', cat='sex.cat', relpath='', **kwargs
     print('running:', '\n'+cmd+'\n')
     subprocess.call(cmd, shell=True)
 
+    # change back to original run directory
     os.chdir(rundir)
