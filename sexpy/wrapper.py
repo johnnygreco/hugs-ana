@@ -11,9 +11,13 @@ class SexWrapper(object):
 
     Parameters
     ----------
-    config : dict
+    config : dict, optional
         Default config parameters that will remain fixed 
         within the SexWrapper instance.
+    params : list, optional
+        List of catalog parameters to save in addition to 
+        those given in cat_params. Only used if PARAMETERS_NAME
+        is not in config, which will override the this option.
     sexin: string, optional
         The input sextractor directory. Input images must
         be within this directory. If 'default', the directory
@@ -25,7 +29,12 @@ class SexWrapper(object):
         is assumed to be sexout/sexpy.
     """
     
-    # all instances will save these parameters to a catalog
+    #################################################
+    # All instances will save these parameters to a 
+    # catalog. These parameters are overridden if 
+    # PARAMETERS_NAME is given in config argument.
+    #################################################
+
     cat_params = ['X_IMAGE', 'Y_IMAGE', 'ALPHA_J2000', 'DELTA_J2000', 
                   'MAG_AUTO', 'FLUX_RADIUS', 'FWHM_IMAGE', 'A_IMAGE',
                   'B_IMAGE', 'THETA_IMAGE']
@@ -62,14 +71,16 @@ class SexWrapper(object):
         assert os.path.isdir(self._sexin), '** sexin directory does not exist **'
 
         #################################################
-        # Write the parameter file with default params 
-        # plus paras for this instance.
+        # Write the sextractor parameter file with 
+        # default params plus params for this instance 
+        # if not given in config argument.
         #################################################
 
-        self.params = self.cat_params + params
-        param_file = open(os.path.join(self._configdir, 'sexpy.params'), 'w')
-        print('\n'.join(self.params), file=param_file)
-        param_file.close()
+        if 'PARAMETERS_NAME' not in config.keys():
+            self.params = self.cat_params + params
+            param_file = open(os.path.join(self._configdir, 'sexpy.params'), 'w')
+            print('\n'.join(self.params), file=param_file)
+            param_file.close()
 
     def reset_config(self):
         """
@@ -192,6 +203,9 @@ class SexWrapper(object):
             run directory. 
         sexfile : string, optional
             Sextractor configure file name. Must be in config directory. 
+            All config params set in this instance will override settings
+            in this file. By default, we use sectractor's default.sex
+            configuration file. 
         cat : string, optional
             Catalog name. Will be written to sexout/{relpath} directory.
         relpath : string, optional
