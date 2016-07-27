@@ -8,7 +8,6 @@ import numpy as np
 min_cuts = {
             'FLUX_RADIUS' : 9, 
             'FWHM_IMAGE'  : 20.0, 
-           # 'ISO0'        :  
            }
 
 max_cuts = {'FLAGS' : 4}
