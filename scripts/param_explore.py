@@ -8,7 +8,7 @@ configuration parameters.
 from __future__ import print_function 
 
 import os
-from sexpy import SexWrapper
+import sexpy
 
 def explore(tract, patch, band='I'):
 
@@ -18,10 +18,9 @@ def explore(tract, patch, band='I'):
                     'WEIGHT_TYPE' : 'MAP_WEIGHT',
                     'FILTER_NAME' : 'gauss_5_31x31.conv'}
 
-    sw = SexWrapper(fixed_config)
+    sw = sexpy.SexWrapper(fixed_config)
             
-
-    detect_thresh = [2.0]#, 1.5, 1.0, 0.9, 0.8]
+    detect_thresh = [2.0, 1.5, 1.0, 0.9, 0.8]
     for dt in detect_thresh:
         sw.set_config('DETECT_THRESH', dt)
         cat = 'DETECT_THRESH_'+str(dt)+'.cat'

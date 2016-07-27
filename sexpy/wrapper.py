@@ -5,13 +5,13 @@ import os
 
 __all__ = ['SexWrapper']
 
-class SexWrapper:
+class SexWrapper(object):
     """
     A python wrapper for SExtractor.
 
     Parameters
     ----------
-    fixed_config : dict
+    config : dict
         Default config parameters that will remain fixed 
         within the SexWrapper instance.
     sexin: string, optional
@@ -24,14 +24,19 @@ class SexWrapper:
         if it doesn't exist. If 'default', the directory structure 
         is assumed to be sexout/sexpy.
     """
+    
+    # all instances will save these parameters to a catalog
+    cat_params = ['X_IMAGE', 'Y_IMAGE', 'ALPHA_J2000', 'DELTA_J2000', 
+                  'MAG_AUTO', 'FLUX_RADIUS', 'FWHM_IMAGE', 'A_IMAGE',
+                  'B_IMAGE', 'THETA_IMAGE']
 
-    def __init__(self, fixed_config={}, sexin='default', sexout='default'):
+    def __init__(self, config={}, params=[], sexin='default', sexout='default'):
 
         #################################################
         # Set default configuration for this instance
         #################################################
 
-        self.default_config = {'PARAMETERS_NAME' : 'myparams',
+        self.default_config = {'PARAMETERS_NAME' : 'sexpy.params',
                                'FILTER'          : 'Y',
                                'THRESH_TYPE'     : 'RELATIVE',
                                'MAG_ZEROPOINT'   : 27.0,
@@ -39,7 +44,7 @@ class SexWrapper:
                                'SEEING_FWHM'     : 0.7,
                                'WEIGHT_THRESH'   : 0.0,
                                'PHOT_FLUXFRAC'   : 0.5}
-        for key, val in fixed_config.iteritems():
+        for key, val in config.iteritems():
             self.default_config[key.upper()] = val
         self.reset_config()
 
@@ -49,10 +54,22 @@ class SexWrapper:
         #################################################
 
         self._filedir = os.path.dirname(os.path.abspath(__file__))
+        self._configdir = os.path.join(self._filedir, 'config')
+        assert os.path.isdir(self._configdir), '** config dir doest not exit **'
         root = os.path.dirname(self._filedir)
         self._sexin = os.path.join(root, 'sexin') if sexin=='default' else sexin
         self._sexout = os.path.join(root, 'sexout') if sexout=='default' else sexout
         assert os.path.isdir(self._sexin), '** sexin directory does not exist **'
+
+        #################################################
+        # Write the parameter file with default params 
+        # plus paras for this instance.
+        #################################################
+
+        self.params = self.cat_params + params
+        param_file = open(os.path.join(self._configdir, 'sexpy.params'), 'w')
+        print('\n'.join(self.params), file=param_file)
+        param_file.close()
 
     def reset_config(self):
         """
@@ -195,7 +212,7 @@ class SexWrapper:
         rundir = os.getcwd()
 
         # run from config directory
-        os.chdir(os.path.join(self._filedir, 'config'))
+        os.chdir(self._configdir)
 
         # append relative path, create sexout path
         # if it doesn't exist
