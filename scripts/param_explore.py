@@ -20,8 +20,8 @@ def explore(tract, patch, band='I'):
 
     sw = sexpy.SexWrapper(fixed_config)
             
-    print('**** testing influcence of DETECT_THRESH ****')
-    detect_thresh = [2.0, 1.5, 1.0, 0.9, 0.8]
+    print('**** testing influence of DETECT_THRESH ****')
+    detect_thresh = [2.0, 1.5, 1.0, 0.9, 0.8, 0.7]
     for thresh in detect_thresh:
         testparam = 'DETECT_THRESH'
         sw.set_config(testparam, thresh)
@@ -31,7 +31,7 @@ def explore(tract, patch, band='I'):
         sw.run('img.fits', cat=cat, relpath=relpath)
     sw.reset_config()
 
-    print('**** testing influcence of DETECT_MINAREA ****')
+    print('**** testing influence of DETECT_MINAREA ****')
     detect_minarea = [3, 5, 10, 50, 100, 500]
     for min_area in detect_minarea:
         testparam = 'DETECT_MINAREA'
@@ -42,8 +42,8 @@ def explore(tract, patch, band='I'):
         sw.run('img.fits', cat=cat, relpath=relpath)
     sw.reset_config()
 
-    print('**** testing influcence of DEBLEND_NTHRESH ****')
-    deblend_nthresh = [1, 2, 8, 16, 32]
+    print('**** testing influence of DEBLEND_NTHRESH ****')
+    deblend_nthresh = [1, 2, 8, 16, 32, 64]
     for n_thresh in deblend_nthresh:
         testparam = 'DEBLEND_NTHRESH'
         sw.set_config(testparam, n_thresh)
@@ -53,8 +53,8 @@ def explore(tract, patch, band='I'):
         sw.run('img.fits', cat=cat, relpath=relpath)
     sw.reset_config()
 
-    print('**** test influcence of DEBLEND_MINCONT ****')
-    deblend_mincont = [0.01, 0.005, 0.0005, 0.00005]
+    print('**** test influence of DEBLEND_MINCONT ****')
+    deblend_mincont = [0.5, 0.1, 0.01, 0.005, 0.0005, 0.00005]
     for min_cont in deblend_mincont:
         testparam = 'DEBLEND_MINCONT'
         sw.set_config(testparam, min_cont)
