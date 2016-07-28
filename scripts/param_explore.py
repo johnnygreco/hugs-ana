@@ -13,15 +13,10 @@ def explore(tract, patch, band='I'):
 
     relpath = 'HSC-'+band+'/'+tract+'/'+patch[0]+'-'+patch[-1]+'/'
 
-    fixed_config = {'PARAMETERS_NAME' : 'myparams',
-                    'WEIGHT_IMAGE'    : 'wts_bad.fits',
-                    'WEIGHT_TYPE'     : 'MAP_WEIGHT',
-                    'FILTER_NAME'     : 'gauss_5_31x31.conv'}
-
-    sw = sexpy.SexWrapper(fixed_config)
+    sw = sexpy.SexWrapper()
             
     print('**** testing influence of DETECT_THRESH ****')
-    detect_thresh = [2.0]#, 1.5, 1.0, 0.9, 0.8, 0.7]
+    detect_thresh = [2.0, 1.5, 1.0, 0.9, 0.8, 0.7]
     for thresh in detect_thresh:
         testparam = 'DETECT_THRESH'
         sw.set_config(testparam, thresh)
@@ -31,7 +26,6 @@ def explore(tract, patch, band='I'):
         sw.run('img.fits', cat=cat, relpath=relpath)
     sw.reset_config()
 
-"""
     print('**** testing influence of DETECT_MINAREA ****')
     detect_minarea = [3, 5, 10, 50, 100, 500]
     for min_area in detect_minarea:
@@ -64,8 +58,7 @@ def explore(tract, patch, band='I'):
         cat = testparam+'_'+str(min_cont)+'.cat'
         sw.run('img.fits', cat=cat, relpath=relpath)
     sw.reset_config()
-    sw.write_config('../sexout/'+relpath+'fixed_config.sex')
-    """
+    sw.write_config('../SExIO/sexout/'+relpath+'fixed_config.sex')
 
 if __name__ =='__main__':
     import argparse
