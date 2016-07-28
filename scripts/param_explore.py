@@ -21,7 +21,7 @@ def explore(tract, patch, band='I'):
     sw = sexpy.SexWrapper(fixed_config)
             
     print('**** testing influence of DETECT_THRESH ****')
-    detect_thresh = [2.0, 1.5, 1.0, 0.9, 0.8, 0.7]
+    detect_thresh = [2.0]#, 1.5, 1.0, 0.9, 0.8, 0.7]
     for thresh in detect_thresh:
         testparam = 'DETECT_THRESH'
         sw.set_config(testparam, thresh)
@@ -31,6 +31,7 @@ def explore(tract, patch, band='I'):
         sw.run('img.fits', cat=cat, relpath=relpath)
     sw.reset_config()
 
+"""
     print('**** testing influence of DETECT_MINAREA ****')
     detect_minarea = [3, 5, 10, 50, 100, 500]
     for min_area in detect_minarea:
@@ -64,6 +65,7 @@ def explore(tract, patch, band='I'):
         sw.run('img.fits', cat=cat, relpath=relpath)
     sw.reset_config()
     sw.write_config('../sexout/'+relpath+'fixed_config.sex')
+    """
 
 if __name__ =='__main__':
     import argparse
