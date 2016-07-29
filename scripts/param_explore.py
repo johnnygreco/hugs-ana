@@ -61,9 +61,6 @@ def explore(tract, patch, band='I'):
     sw.write_config('../SExIO/sexout/'+relpath+'fixed_config.sex')
 
 if __name__ =='__main__':
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('tract', type=str)
-    parser.add_argument('patch', type=str)
-    args = parser.parse_args()
+    from hugs.parser import parse_args
+    args = parse_args()
     explore(args.tract, args.patch)
