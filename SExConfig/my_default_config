@@ -1,0 +1,11 @@
+PIXEL_SCALE      0.168           
+FILTER_NAME      gauss_5.0_31x31.conv
+FILTER           Y               
+PARAMETERS_NAME  sexpy.params    
+PHOT_FLUXFRAC    0.5             
+MAG_ZEROPOINT    27.0            
+WEIGHT_THRESH    0.0             
+WEIGHT_IMAGE     wts_bad.fits    
+SEEING_FWHM      0.7             
+WEIGHT_TYPE      MAP_WEIGHT      
+THRESH_TYPE      RELATIVE        
