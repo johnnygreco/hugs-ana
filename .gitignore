@@ -4,6 +4,7 @@
 .dropbox.attr
 .ipynb_checkpoints
 *.conv
+*.param
 sexin
 sexout
 scratch
