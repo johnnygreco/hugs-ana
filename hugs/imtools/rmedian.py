@@ -30,7 +30,7 @@ def _ring(r_inner, r_outer, dtype=np.int, invert=False):
     x = np.arange(-int(r_outer), int(r_outer)+1)
     r = np.sqrt(x**2 + x[:,None]**2)
     annulus = (r>r_inner) & (r<=r_outer)
-    if invert_ring:
+    if invert:
         annulus = ~annulus
     r[annulus] = 1
     r[~annulus] = 0
