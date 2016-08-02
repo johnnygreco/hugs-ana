@@ -1,3 +1,3 @@
-from .imfilter import *
+from .rmedian import rmedian
 from .cutout import *
-from .footprints import *
+from .fitsmanip import *
