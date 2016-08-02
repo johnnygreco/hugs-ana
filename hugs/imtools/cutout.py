@@ -1,9 +1,9 @@
 
 from __future__ import print_function
 
-__all__  = ['get_cutout']
+__all__  = ['cutout']
 
-def get_cutout(data, coord, header=None, size=300, save_fn=None):
+def cutout(data, coord, header=None, size=300, save_fn=None):
     """
     Generate a postage stamp from from a fits image.
 

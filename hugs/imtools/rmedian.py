@@ -40,9 +40,8 @@ def _ring(r_inner, r_outer, dtype=np.int, invert=False):
 def rmedian(infile, outfile, r_inner, r_outer, **kwargs):
     """
     Median filter image with a ring footprint. This
-    is similar to the rmedian iraf task; although, for 
-    reasons I do not understand, the results are somewhat 
-    different. 
+    function produces results similar to the IRAF 
+    task of the same name (except this is much faster). 
 
     Parameters
     ----------
