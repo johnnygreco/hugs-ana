@@ -3,7 +3,7 @@ from __future__ import print_function
 
 __all__  = ['cutout']
 
-def cutout(data, coord, header=None, size=300, save_fn=None):
+def cutout(data, coord, header=None, size=300, write=None):
     """
     Generate a postage stamp from from a fits image.
 
@@ -20,13 +20,13 @@ def cutout(data, coord, header=None, size=300, save_fn=None):
     size : int, array-like, optional
         The size of the cutout array along each axis.
         If an integer is given, will get a square. 
-    save_fn : string, optional
+    write : string, optional
         If not None, save the cutout to this 
         file name.
 
     Returns
     -------
-    cutout : Cutout2D object, if save_fn is None
+    cutout : Cutout2D object, if write is None
        A cutout object containing the 2D cutout data 
        array and the updated WCS.
     """
@@ -41,12 +41,12 @@ def cutout(data, coord, header=None, size=300, save_fn=None):
         coord = SkyCoord(coord[0], coord[1], frame='icrs', unit="deg") 
         cutout = Cutout2D(data, coord, size, wcs=w)
 
-    if save_fn is None:
+    if write is None:
         return cutout
     else:
         from astropy.io import fits
         header = cutout.wcs.to_header() if header is not None else None
-        fits.writeto(save_fn, cutout.data, header, clobber=True)
+        fits.writeto(write, cutout.data, header, clobber=True)
 
 if __name__=='__main__':
     import argparse
@@ -62,7 +62,7 @@ if __name__=='__main__':
     f = fits.open(args.file)[0]
     header = None if args.no_header else f.header
     coord = (args.x, args.y)
-    cutout = get_cutout(f.data, coord, header, size=args.size, save_fn=args.write)
+    cutout = get_cutout(f.data, coord, header, size=args.size, write=args.write)
     if args.write is None:
         import matplotlib.pyplot as plt
         from toolbox.image import zscale

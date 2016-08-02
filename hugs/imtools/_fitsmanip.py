@@ -1,3 +1,9 @@
+"""
+A collection of functions for manipulating fits images. 
+"""
+
+from __future__ import print_function
+
 import numpy as np
 from astropy.io import fits
 
