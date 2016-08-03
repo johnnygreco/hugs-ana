@@ -5,7 +5,7 @@ PARAMETERS_NAME  sexpy.param
 PHOT_FLUXFRAC    0.5             
 MAG_ZEROPOINT    27.0            
 WEIGHT_THRESH    0.0             
-WEIGHT_IMAGE     wts.fits    
+WEIGHT_IMAGE     wts_bad.fits    
 SEEING_FWHM      0.7             
 WEIGHT_TYPE      MAP_WEIGHT      
 THRESH_TYPE      RELATIVE        

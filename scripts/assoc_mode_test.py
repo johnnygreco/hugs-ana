@@ -10,7 +10,7 @@ args = parse_args()
 tract, patch = args.tract, args.patch
 relpath = 'HSC-I/'+str(tract)+'/'+patch[0]+'-'+patch[-1]
 
-do_steps = [0,0,0,0,0,1]
+do_steps = [1,1,1,1,1,1]
 
 params = ['X_IMAGE', 'Y_IMAGE', 'MAG_AUTO']
 

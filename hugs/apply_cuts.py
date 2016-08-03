@@ -7,7 +7,7 @@ import numpy as np
 
 min_cuts = {
             'FLUX_RADIUS' : 9, 
-            'FWHM_IMAGE'  : 20.0, 
+            #'FWHM_IMAGE'  : 20.0, 
            }
 
 max_cuts = {'FLAGS' : 4}
@@ -22,12 +22,12 @@ def apply_cuts(cat):
     print(len(cat), 'objects in cat before cuts')
 
     min_mask = np.ones(len(cat), dtype=bool)
-    for key, min_val in cuts['min'].iteritems():
+    for key, min_val in cuts['min'].items():
         print('cutting', key, 'at', min_val)
         min_mask[cat[key] < min_val] = False
 
     max_mask = np.ones(len(cat), dtype=bool)
-    for key, max_val in cuts['max'].iteritems():
+    for key, max_val in cuts['max'].items():
         print('cutting', key, 'at', max_val)
         max_mask[cat[key] > max_val] = False
 
@@ -37,3 +37,4 @@ def apply_cuts(cat):
     print(len(cat), 'objects in cat after cuts')
 
     return cat
+
