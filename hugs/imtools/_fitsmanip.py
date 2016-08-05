@@ -35,6 +35,7 @@ def bg_sub(img_file, bg_file, write=None):
         return img_bg_sub
     else:
         assert (img_file is not write) and (bg_file is not write)
+        assert write[-8:] not in ['img.fits', 'wts.fits', 'wts_bad.fits']
         print('writing', write)
         fits.writeto(write, img_bg_sub, img.header, clobber=True)
 
@@ -67,6 +68,7 @@ def gen_sky_noise(rms_file, sky_file=None, write=None):
         noise += sky
     if write is not None:
         assert (rms_file is not write) and (rms_file is not write)
+        assert write[-8:] not in ['img.fits', 'wts.fits', 'wts_bad.fits']
         print('writing', write)
         header = fits.getheader(rms_file)
         fits.writeto(write, noise, header, clobber=True)
@@ -106,6 +108,7 @@ def replace_with_sky(img_file, seg_file, rms_file, sky_file=None, write=None):
     if write is not None:
         for fn in [img_file, seg_file, rms_file, sky_file]:
             assert fn is not write
+        assert write[-8:] not in ['img.fits', 'wts.fits', 'wts_bad.fits']
         print('writing', write)
         fits.writeto(write, img.data, img.header, clobber=True)
     else:

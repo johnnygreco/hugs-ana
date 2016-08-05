@@ -5,6 +5,7 @@
 .ipynb_checkpoints
 *.conv
 *.param
+*.reg
 sexin
 sexout
 scratch
