@@ -3,7 +3,7 @@ from __future__ import print_function
 
 __all__  = ['cutout']
 
-def cutout(data, coord, header=None, size=300, write=None):
+def cutout(data, coord, header=None, size=301, write=None):
     """
     Generate a postage stamp from from a fits image.
 
