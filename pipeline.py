@@ -142,4 +142,4 @@ if __name__=='__main__':
     relpath = 'HSC-'+band+'/'+str(tract)+'/'+patch[0]+'-'+patch[-1]
     run_label = 'HSC-'+band+'_'+str(tract)+'_'+patch
     main(relpath, run_label, make_ds9reg=True, view_with_ds9=True,
-            textparam=args.text_param)
+         textparam=args.text_param)
