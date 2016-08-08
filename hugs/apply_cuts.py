@@ -5,11 +5,7 @@ __all__ = ['cuts', 'apply_cuts']
 
 import numpy as np
 
-min_cuts = {
-            'FLUX_RADIUS' : 9, 
-            #'FWHM_IMAGE'  : 20.0, 
-           }
-
+min_cuts = {'ISO0': 400, 'FLUX_RADIUS': 9}
 max_cuts = {'FLAGS' : 4}
 
 cuts = {'min' : min_cuts, 'max' : max_cuts}

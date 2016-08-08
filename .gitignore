@@ -10,3 +10,4 @@ sexin
 sexout
 scratch
 results/*.cat
+results/*.txt

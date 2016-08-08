@@ -1,3 +1,3 @@
 from .rmedian import *
 from .cutout import *
-from ._fitsmanip import *
+from ._funcs import *

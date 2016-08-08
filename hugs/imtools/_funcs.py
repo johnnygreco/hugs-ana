@@ -75,7 +75,8 @@ def gen_sky_noise(rms_file, sky_file=None, write=None):
     else:
         return noise
 
-def replace_with_sky(img_file, seg_file, rms_file, sky_file=None, write=None): 
+def replace_with_sky(img_file, seg_file, rms_file, sky_file=None, write=None,
+                     dilate_size=None): 
     """
     Replace patches of sky associated with objects with sky noise.
 
@@ -95,6 +96,9 @@ def replace_with_sky(img_file, seg_file, rms_file, sky_file=None, write=None):
         None, the rms level is centered at zero. 
     write : string, optional
         If not None, the file name to write new image to.
+    dilate_size : int, optional
+        The size of the square array used to dilate the 
+        segmentation image.
 
     Returns
     -------
@@ -104,6 +108,12 @@ def replace_with_sky(img_file, seg_file, rms_file, sky_file=None, write=None):
     noise = gen_sky_noise(rms_file, sky_file)
     img = fits.open(img_file)[0]
     seg_map = fits.getdata(seg_file)
+    if dilate_size is not None:
+        from scipy import ndimage
+        print('dilate img with '+str(dilate_size)+'x'+str(dilate_size)+' box')
+        dilate = np.ones((dilate_size, dilate_size))
+        seg_map = (seg_map==0)
+        seg_map = ndimage.binary_dilation(~seg_map, dilate)
     img.data[seg_map!=0] = noise[seg_map!=0]
     if write is not None:
         for fn in [img_file, seg_file, rms_file, sky_file]:
