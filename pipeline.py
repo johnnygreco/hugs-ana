@@ -18,7 +18,7 @@ BACK_SIZE = 128
 #########################################
 
 def main(relpath, run_label, results_dir='results', make_ds9reg=False, 
-         view_with_ds9=False, log_fn=None, **kwargs):
+        view_with_ds9=False, log_fn=None, clean=None, **kwargs):
     if log_fn is not None:
         # write stdout to log
         import sys
@@ -116,7 +116,7 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
     cat.write(outfile, format='ascii')
     created_files.append(outfile)
     cat = hugs.apply_cuts(cat)
-    outfile = os.path.join(results_dir, run_label+'.txt')
+    outfile = os.path.join(results_dir, run_label+'_with_cut.txt')
     cat.write(outfile, format='ascii')
     created_files.append(outfile)
     #######################
@@ -129,7 +129,29 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
         from toolbox.utils import ds9view
         ds9view(sw.get_indir('img.fits'), regfile)
     
-    print('created files:\n'+'\n'.join(created_files))
+    # do some bookkeeping and delete unwanted files
+    saved_files = []
+    if clean:
+        print('deleting:')
+        for path in created_files:
+            if clean=='all':
+                if 'results' not in path.split('/'):
+                    print(path)
+                    os.remove(path)
+                else:
+                    saved_files.append(path)
+            elif clean=='fits':
+                if 'fits'==path[-4:]:
+                    print(path)
+                    os.remove(path)
+                else:
+                    saved_files.append(path)
+            else:
+                print('**** invalid cleaning option ****')
+    else:
+        saved_files = created_files
+    print('saved files:\n'+'\n'.join(saved_files))
+    #######################
 
     if log_fn is not None:
         # switch stdout back
@@ -142,4 +164,4 @@ if __name__=='__main__':
     relpath = 'HSC-'+band+'/'+str(tract)+'/'+patch[0]+'-'+patch[-1]
     run_label = 'HSC-'+band+'_'+str(tract)+'_'+patch
     main(relpath, run_label, make_ds9reg=True, view_with_ds9=True,
-         textparam=args.text_param)
+         textparam=args.text_param, clean=args.clean)

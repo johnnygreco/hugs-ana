@@ -9,6 +9,8 @@ def parse_args(kind='pipeline'):
     parser.add_argument('-b', '--band', help='HSC band', default='I')
     parser.add_argument('--text_param', help='ds9 reg text parameter',
                         default='MAG_AUTO')
+    parser.add_argument('--clean', type=str, help='delete created files'
+                        ' options: all or fits')
     args = parser.parse_args()
     band, tract, patch = args.band.upper(), args.tract, args.patch
     if kind=='pipeline':
