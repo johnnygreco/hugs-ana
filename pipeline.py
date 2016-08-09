@@ -1,6 +1,7 @@
 #!/usr/bin/env python 
 
 import os
+import shutil
 import time
 
 from scipy import ndimage
@@ -18,7 +19,8 @@ BACK_SIZE = 128
 #########################################
 
 def main(relpath, run_label, results_dir='results', make_ds9reg=False, 
-        view_with_ds9=False, log_fn=None, clean=None, **kwargs):
+         view_with_ds9=False, log_fn=None, clean=None, verbose=False, **kwargs):
+
     if log_fn is not None:
         # write stdout to log
         import sys
@@ -33,20 +35,23 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
     print('*******************************')
 
     created_files = []
+    sex_verbose = 'NORMAL' if verbose else 'QUIET'
 
     # detect bright sources
     step = 'bright'
     config = {'DETECT_THRESH': HI_THRESH,
               'DETECT_MINAREA': 3,
-              'BACK_SIZE': BACK_SIZE}
+              'BACK_SIZE': BACK_SIZE, 
+              'VERBOSE_TYPE': sex_verbose}
     params = ['X_IMAGE', 'Y_IMAGE', 'MAG_AUTO']
     sw = sexpy.SexWrapper(config, params, relpath=relpath)
     sw.set_check_images(['b', 'brms'], prefix=step+'-')
     check_files = [sw.get_outdir(f) for f in 
                    sw.get_config()['CHECKIMAGE_NAME'].split(',')]
     bright_cat = step+'.cat'
-    sw.print_config()
-    sw.print_params()
+    if verbose:
+        sw.print_config()
+        sw.print_params()
     sw.run('img.fits', cat=bright_cat)
 
     created_files.extend(check_files)
@@ -63,7 +68,8 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
               'ASSOC_DATA': '1,2,3',
               'ASSOCSELEC_TYPE': 'MATCHED',
               'DETECT_THRESH': LO_THRESH,
-              'BACK_SIZE': BACK_SIZE}
+              'BACK_SIZE': BACK_SIZE, 
+              'VERBOSE_TYPE': sex_verbose}
     params = ['X_IMAGE', 'Y_IMAGE','MAG_AUTO']+\
              ['VECTOR_ASSOC('+str(i)+')' for i in range(1,4)]
     sw = sexpy.SexWrapper(config, params, relpath=relpath)
@@ -71,8 +77,9 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
     check_files = [sw.get_outdir(f) for f in 
                    sw.get_config()['CHECKIMAGE_NAME'].split(',')]
     assoc_cat = step+'.cat'
-    sw.print_config()
-    sw.print_params()
+    if verbose:
+        sw.print_config()
+        sw.print_params()
     sw.run('img.fits', cat=assoc_cat)
 
     created_files.extend(check_files)
@@ -92,13 +99,15 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
     step = 'detect'
     config = {'DETECT_THRESH': round(LO_THRESH-0.1,1),
               'FILTER_NAME': 'gauss_15.0_31x31.conv',
-              'BACK_SIZE': BACK_SIZE}
+              'BACK_SIZE': BACK_SIZE,
+              'VERBOSE_TYPE': sex_verbose}
     sw = sexpy.SexWrapper(config, relpath=relpath)
     sw.set_check_images(['a', 'f'], prefix=step+'-')
     check_files = [sw.get_outdir(f) for f in 
                    sw.get_config()['CHECKIMAGE_NAME'].split(',')]
-    sw.print_config()
-    sw.print_params()
+    if verbose:
+        sw.print_config()
+        sw.print_params()
     detect_cat = step+'.cat'
     sw.run(new_img_fn.split('/')[-1], cat=detect_cat)
 
@@ -130,27 +139,24 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
         ds9view(sw.get_indir('img.fits'), regfile)
     
     # do some bookkeeping and delete unwanted files
-    saved_files = []
-    if clean:
-        print('deleting:')
+    if verbose: print('created files:\n'+'\n'.join(created_files))
+    if clean=='all':
+        if verbose: print('deleting:')
         for path in created_files:
-            if clean=='all':
-                if 'results' not in path.split('/'):
-                    print(path)
-                    os.remove(path)
-                else:
-                    saved_files.append(path)
-            elif clean=='fits':
-                if 'fits'==path[-4:]:
-                    print(path)
-                    os.remove(path)
-                else:
-                    saved_files.append(path)
-            else:
-                print('**** invalid cleaning option ****')
-    else:
-        saved_files = created_files
-    print('saved files:\n'+'\n'.join(saved_files))
+            if 'results' not in path.split('/'):
+                if verbose: print(path)
+                os.remove(path)
+        path = sw.get_sexout(relpath.split('/')[0])
+        if verbose: print(path)
+        shutil.rmtree(path)
+    elif clean=='fits':
+        if verbose: print('deleting:')
+        for path in created_files:
+            if 'fits'==path[-4:]:
+                if verbose: print(path)
+                os.remove(path)
+    elif clean is not None:
+        print('**** invalid cleaning option ****')
     #######################
 
     if log_fn is not None:
@@ -164,4 +170,4 @@ if __name__=='__main__':
     relpath = 'HSC-'+band+'/'+str(tract)+'/'+patch[0]+'-'+patch[-1]
     run_label = 'HSC-'+band+'_'+str(tract)+'_'+patch
     main(relpath, run_label, make_ds9reg=True, view_with_ds9=True,
-         textparam=args.text_param, clean=args.clean)
+         textparam=args.text_param, clean=args.clean, verbose=args.verbose)

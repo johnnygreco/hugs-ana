@@ -11,6 +11,8 @@ def parse_args(kind='pipeline'):
                         default='MAG_AUTO')
     parser.add_argument('--clean', type=str, help='delete created files'
                         ' options: all or fits')
+    parser.add_argument('-v',  '--verbose', help='run in verbose mode',
+                        action='store_true')
     args = parser.parse_args()
     band, tract, patch = args.band.upper(), args.tract, args.patch
     if kind=='pipeline':
