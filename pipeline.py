@@ -13,9 +13,11 @@ import sexpy
 #########################################
 # Pipeline parameters
 #########################################
-HI_THRESH = 9.0
-LO_THRESH = 0.8
 BACK_SIZE = 128
+HI_THRESH = 9.0
+LO_THRESH_1 = 0.5
+LO_THRESH_2 = 0.7
+ASSOC_RADIUS = 20.0
 #########################################
 
 def main(relpath, run_label, results_dir='results', make_ds9reg=False, 
@@ -64,10 +66,10 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
     config = {'ASSOC_NAME': bright_cat,
               'ASSOC_PARAMS': '1,2,3',
               'ASSOC_TYPE': 'MAG_MEAN',
-              'ASSOC_RADIUS': 2.0,
+              'ASSOC_RADIUS': ASSOC_RADIUS,
               'ASSOC_DATA': '1,2,3',
               'ASSOCSELEC_TYPE': 'MATCHED',
-              'DETECT_THRESH': LO_THRESH,
+              'DETECT_THRESH': LO_THRESH_1,
               'BACK_SIZE': BACK_SIZE, 
               'VERBOSE_TYPE': sex_verbose}
     params = ['X_IMAGE', 'Y_IMAGE','MAG_AUTO']+\
@@ -97,7 +99,7 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
 
     # detect sources
     step = 'detect'
-    config = {'DETECT_THRESH': round(LO_THRESH-0.1,1),
+    config = {'DETECT_THRESH': LO_THRESH_2,
               'FILTER_NAME': 'gauss_15.0_31x31.conv',
               'BACK_SIZE': BACK_SIZE,
               'VERBOSE_TYPE': sex_verbose}
@@ -122,10 +124,6 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
     sigma /= (10**(-0.4*cat['MU_THRESHOLD'])*cat['ISO0'])
     cat['SIGMA'] = sigma
     outfile = os.path.join(results_dir, run_label+'_full_cat.txt')
-    cat.write(outfile, format='ascii')
-    created_files.append(outfile)
-    cat = hugs.apply_cuts(cat)
-    outfile = os.path.join(results_dir, run_label+'_with_cut.txt')
     cat.write(outfile, format='ascii')
     created_files.append(outfile)
     #######################

@@ -68,7 +68,6 @@ def combine_cats(group_id, min_sep=0.7):
     print(len(cat), 'object after cutting doubles')
     cat.write(os.path.join(results_dir, 'master_cat.txt'), format='ascii')
     cat = hugs.apply_cuts(cat)
-    print(len(cat), 'object after selection cuts')
     cat.write(os.path.join(results_dir, 'selection_cat.txt'), format='ascii')
 
 if __name__=='__main__':
