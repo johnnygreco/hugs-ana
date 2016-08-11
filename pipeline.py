@@ -92,7 +92,7 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
     hugs.imtools.replace_with_sky(
         sw.get_indir('img.fits'), sw.get_outdir(step+'-SEGMENTATION.fits'),
         sw.get_outdir('bright-BACKGROUND_RMS.fits'), sw.get_outdir('bright-BACKGROUND.fits'),
-        write=new_img_fn, dilate_size=11)
+        write=new_img_fn, dilator=11)
     created_files.append(new_img_fn)
     del sw
     #######################
