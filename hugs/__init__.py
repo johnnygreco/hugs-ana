@@ -1,4 +1,4 @@
 from . import parser
 from . import imtools
-from . import groups
+from . import datasets
 from ._utils import *
