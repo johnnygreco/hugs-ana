@@ -73,7 +73,7 @@ def combine_cats(group_id, min_sep=0.7):
 if __name__=='__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('group_id', type=int)
+    parser.add_argument('group_id', type=str)
     parser.add_argument('-b', '--band', help='HSC band', default='I')
     parser.add_argument('--min_sep', default=0.7)
     parser.add_argument('-r', '--run_only', action='store_true')

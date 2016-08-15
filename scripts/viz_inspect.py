@@ -35,9 +35,12 @@ class MyButtons(object):
     def get_info(self, event):
         print(cat['ALPHA_J2000', 'DELTA_J2000', 'MAG_AUTO',\
                   'FLUX_RADIUS', 'ISO0', 'SIGMA', 'FLAGS'][i])
+    def save(self, event):
+        print('saving image...')
+        f.savefig('../figures/group_'+args.group_id+'_cand'+str(i)+'.pdf')
 
 buttons = MyButtons()
-
+numcand = len(cat)
 for i, c in enumerate(cat):
     ra, dec = c['ALPHA_J2000'], c['DELTA_J2000']
     tract, patch = c['tract'], c['patch']
@@ -61,6 +64,7 @@ for i, c in enumerate(cat):
     axkeep = plt.axes([0.82, 0.6, 0.13, 0.075])
     axdiscard = plt.axes([0.82, 0.5, 0.13, 0.075])
     axinfo = plt.axes([0.82, 0.25, 0.13, 0.075])
+    axsave = plt.axes([0.82, 0.15, 0.13, 0.075])
 
     bkeep = Button(axkeep, 'Keep', color='g')
     bkeep.on_clicked(buttons.keep)
@@ -68,7 +72,10 @@ for i, c in enumerate(cat):
     bdiscard.on_clicked(buttons.discard)
     binfo = Button(axinfo, 'info', color='y')
     binfo.on_clicked(buttons.get_info)
+    bsave = Button(axsave, 'save', color='b')
+    bsave.on_clicked(buttons.save)
 
+    a.set_title('candidate '+str(i)+' of '+str(numcand))
     plt.setp(a.get_xticklabels(), visible=False)
     plt.setp(a.get_yticklabels(), visible=False)
 

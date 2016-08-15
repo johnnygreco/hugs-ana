@@ -117,7 +117,7 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
     created_files.append(sw.get_outdir(detect_cat))
     #######################
 
-    # make cuts on final catalog
+    # save final catalog in ascii format
     cat = sexpy.read_cat(sw.get_outdir(detect_cat))
     # sigma from Lauren's work
     sigma = 1e11*10**(-0.4*cat['MU_MAX'])*10**(-0.4*cat['MAG_ISO'])
