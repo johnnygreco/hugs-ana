@@ -6,7 +6,7 @@ import numpy as np
 from astropy.table import Table
 yangdir = os.path.join(os.environ.get('DATA_DIR'), 'catalogs/Yang')
 
-__all__ = ['load_yang_groups', 'load_yang_gals']
+__all__ = ['load_yang_groups', 'load_yang_gals', 'get_group_prop']
 
 def load_yang_groups():
     """
@@ -32,3 +32,23 @@ def load_yang_gals():
     members.remove_column('vagc_id')
     members.sort('group_id')
     return members
+
+
+def get_group_prop(group_id, keys):
+    """
+    Get properties of a Yang group.
+
+    Parameters
+    ----------
+    group_id : int
+        The group id number.
+    keys : string or list of strings
+        Name of desired group properties.
+
+    Returns
+    -------
+    vals : list
+        The group properties.
+    """
+    tab = load_yang_groups()
+    return tab[keys][group_id-1]
