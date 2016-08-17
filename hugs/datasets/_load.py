@@ -43,12 +43,12 @@ def get_group_prop(group_id, keys):
     group_id : int
         The group id number.
     keys : string or list of strings
-        Name of desired group properties.
+        Names of desired group properties.
 
     Returns
     -------
-    vals : list
+    vals : float or table
         The group properties.
     """
     tab = load_yang_groups()
-    return tab[keys][group_id-1]
+    return tab[keys][int(group_id)-1]
