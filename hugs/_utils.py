@@ -6,13 +6,11 @@ from __future__ import (absolute_import, division, print_function,
 
 import numpy as np
 
-__all__ = ['cuts', 'apply_cuts', 'bit_dict', 'get_bitmask_flags']
+__all__ = ['pixscale', 'apply_cuts', 'bit_dict', 'get_bitmask_flags', 'yang_r180']
 
-min_cuts = {'ISO0': 400, 'FLUX_RADIUS': 9}
-max_cuts = {'FLAGS' : 3}
-cuts = {'min' : min_cuts, 'max' : max_cuts}
+pixscale = 0.168 # arcsec/pixel
 
-def apply_cuts(cat):
+def apply_cuts(cat, z=0.05, min_reff=1.5, min_iso0=400, max_flags=3, sb_lo=23.99):
     """
     Apply selection cuts to input catalog. 
 
@@ -20,22 +18,47 @@ def apply_cuts(cat):
     ----------
     cat : astropy.table.Table
         Catalog of objects detected by SExtractor. 
+    z : float, optional
+        Galaxy group redshift
+    min_reff : float, optional
+        Cut at and below this effective radius in kpc.
+    min_iso0 : int, optional
+        Cut at and below this isophotal area (pixel^2).
+    max_flags : int, optional
+        Cut at and above this many flags 
+    sb_lo : float, optional
+        Cut when central SB is lower (i.e., brighter) than
+        this value in mag/arcsec
 
     Returns
     cat : astropy.table.Table
         The catalog with the selection cuts applied.
     """
+    import astropy.units as u
+    from toolbox.cosmo import Cosmology
+    
+    cosmo = Cosmology()
+    kpc_per_pix = u.arcsec.to('radian')*pixscale*cosmo.D_A(z)*1e3
+    min_flux_radius = (min_reff/kpc_per_pix) # pixels
 
+    min_cuts = {'ISO0': min_iso0, 
+                'FLUX_RADIUS': min_flux_radius,
+                'MU_APER_2': sb_lo}
+    max_cuts = {'FLAGS' : max_flags}
+    cuts = {'min' : min_cuts, 'max' : max_cuts}
+    
     print(len(cat), 'objects in cat before cuts')
 
     min_mask = np.ones(len(cat), dtype=bool)
     for key, min_val in cuts['min'].items():
-        print('cutting', key, 'at', min_val)
-        min_mask[cat[key] <= min_val] = False
+        if min_val is not None:
+            print('cutting', key, 'at', min_val)
+            min_mask[cat[key] <= min_val] = False
     max_mask = np.ones(len(cat), dtype=bool)
     for key, max_val in cuts['max'].items():
-        print('cutting', key, 'at', max_val)
-        max_mask[cat[key] >= max_val] = False
+        if max_val is not None:
+            print('cutting', key, 'at', max_val)
+            max_mask[cat[key] >= max_val] = False
     mask = min_mask & max_mask
     cat = cat[mask]
     print(len(cat), 'objects in cat after cuts')
@@ -57,6 +80,7 @@ bit_dict =  {1: 'BAD',                # Pixel is physically bad (a known camera 
              4096: 'NOT_DEBLENDED',   # 
              8192: 'UNMASKEDNAN'}     # A NaN occurred in this pixel in ISR (instrument signature removal - bias,flat,etc)
 
+
 def get_bitmask_flags(decimal_sum):
     """
     Return the flags associated with the decimal sum 
@@ -76,3 +100,26 @@ def get_bitmask_flags(decimal_sum):
     on_bits = decimal_mask_vals[(decimal_sum & decimal_mask_vals)!=0]
     flags = [bit_dict[b] for b in on_bits]
     return flags 
+
+
+def yang_r180(Mh, z, h=0.693):
+    """
+    Virial radius of a group given its halo mass
+    and redshift. From Yang et al. 2007.
+
+    Parameters
+    ----------
+    Mh : float
+        Halo mass in Solar masses.
+    z : float
+        Redshift to galaxy group.
+    h : float, optional
+        Little h. Uses WMAP9 value by default.
+
+    Returns
+    -------
+    r180 : float
+        The groups virial radius.
+    """
+    r180 = (1.26/h)*(Mh/(1.0e14/h))**(1.0/3.0)/(1+z) # Mpc
+    return r180
