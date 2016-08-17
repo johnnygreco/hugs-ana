@@ -41,12 +41,12 @@ def doubles_mask(cat, min_sep=0.7):
             mask &= unique   # double entries set to False
     return mask
 
-def combine_cats(group_id, min_sep=0.7):
+def build_final_cat(group_id, min_sep=0.7, random=False):
     """
-    Combine the catalogs into one master cat. 
-    min_sep = separation at which two objects are 
-    considered the same. Default is 0.7", which is 
-    roughly the FWHM. 
+    Combine the catalogs into one master cat, make cuts, 
+    and build final cat. min_sep = separation at which two 
+    objects are considered the same. Default is 0.7", which 
+    is roughly the seeing FWHM. 
     """
     import hugs
     from astropy.table import Table, vstack
@@ -66,8 +66,20 @@ def combine_cats(group_id, min_sep=0.7):
     mask = doubles_mask(full_cat, min_sep)
     cat = full_cat[mask]
     print(len(cat), 'object after cutting doubles')
+    # calculate SB for each circular aperture 
+    aper_diams = [3.,4.,5.,6.,7.,8.,16.,32.] # pixels
+    for i, diam in enumerate(aper_diams):
+        r = hugs.pixscale*diam/2 # arcsec
+        colname = 'MAG_APER' if i==0 else 'MAG_APER_'+str(i)
+        sb = cat[colname] + 2.5*np.log10(np.pi*r**2)
+        cat['MU_APER_'+str(i)] = sb
     cat.write(os.path.join(results_dir, 'master_cat.txt'), format='ascii')
-    cat = hugs.apply_cuts(cat)
+    if random:
+        z = 0.05
+    else:
+        z = hugs.datasets.get_group_prop(group_id, 'z')
+    print('making cuts assumimg z =', z)
+    cat = hugs.apply_cuts(cat, z=z)
     cat.write(os.path.join(results_dir, 'selection_cat.txt'), format='ascii')
 
 if __name__=='__main__':
@@ -77,9 +89,10 @@ if __name__=='__main__':
     parser.add_argument('-b', '--band', help='HSC band', default='I')
     parser.add_argument('--min_sep', default=0.7)
     parser.add_argument('-r', '--run_only', action='store_true')
-    parser.add_argument('-c', '--combine_only', action='store_true')
+    parser.add_argument('-c', '--cat_only', action='store_true')
+    parser.add_argument('--random', action='store_true')
     args = parser.parse_args()
-    if not args.combine_only:
+    if not args.cat_only:
         run(args.group_id, args.band)
     if not args.run_only:
-        combine_cats(args.group_id, args.min_sep)
+        build_final_cat(args.group_id, args.min_sep, random=args.random)
