@@ -1,4 +1,9 @@
 #!/usr/bin/env python 
+"""
+Preliminary HSC-HUGs detection pipeline. 
+"""
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import shutil
@@ -38,13 +43,15 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
 
     created_files = []
     sex_verbose = 'NORMAL' if verbose else 'QUIET'
+    param_fn = run_label+'.param' # create unique param file
 
     # detect bright sources
     step = 'bright'
     config = {'DETECT_THRESH': HI_THRESH,
               'DETECT_MINAREA': 3,
               'BACK_SIZE': BACK_SIZE, 
-              'VERBOSE_TYPE': sex_verbose}
+              'VERBOSE_TYPE': sex_verbose,
+              'PARAMETERS_NAME': param_fn}
     params = ['X_IMAGE', 'Y_IMAGE', 'MAG_AUTO']
     sw = sexpy.SexWrapper(config, params, relpath=relpath)
     sw.set_check_images(['b', 'brms'], prefix=step+'-')
@@ -71,7 +78,8 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
               'ASSOCSELEC_TYPE': 'MATCHED',
               'DETECT_THRESH': LO_THRESH_1,
               'BACK_SIZE': BACK_SIZE, 
-              'VERBOSE_TYPE': sex_verbose}
+              'VERBOSE_TYPE': sex_verbose, 
+              'PARAMETERS_NAME': param_fn}
     params = ['X_IMAGE', 'Y_IMAGE','MAG_AUTO']+\
              ['VECTOR_ASSOC('+str(i)+')' for i in range(1,4)]
     sw = sexpy.SexWrapper(config, params, relpath=relpath)
@@ -102,7 +110,9 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
     config = {'DETECT_THRESH': LO_THRESH_2,
               'FILTER_NAME': 'gauss_15.0_31x31.conv',
               'BACK_SIZE': BACK_SIZE,
-              'VERBOSE_TYPE': sex_verbose}
+              'VERBOSE_TYPE': sex_verbose,
+              'PHOT_APERTURES': '3,4,5,6,7,8,16,32', 
+              'PARAMETERS_NAME': param_fn}
     sw = sexpy.SexWrapper(config, relpath=relpath)
     sw.set_check_images(['a', 'f'], prefix=step+'-')
     check_files = [sw.get_outdir(f) for f in 
@@ -155,6 +165,8 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
                 os.remove(path)
     elif clean is not None:
         print('**** invalid cleaning option ****')
+    if verbose: print('deleting:', sw.get_configdir(param_fn))
+    os.remove(sw.get_configdir(param_fn)) # delete unique param file
     #######################
 
     if log_fn is not None:
