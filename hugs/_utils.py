@@ -6,7 +6,8 @@ from __future__ import (absolute_import, division, print_function,
 
 import numpy as np
 
-__all__ = ['pixscale', 'apply_cuts', 'bit_dict', 'get_bitmask_flags', 'yang_r180']
+__all__ = ['pixscale', 'apply_cuts', 'bit_dict', 
+           'get_bitmask_flags', 'yang_r180', 'doubles_mask']
 
 pixscale = 0.168 # arcsec/pixel
 
@@ -123,3 +124,20 @@ def yang_r180(Mh, z, h=0.693):
     """
     r180 = (1.26/h)*(Mh/(1.0e14/h))**(1.0/3.0)/(1+z) # Mpc
     return r180
+
+
+def doubles_mask(cat, min_sep=0.7):
+    """
+    Build mask for double entries in a catalog. 
+    Consider object within min_sep arcsec the same object
+    """
+    from toolbox.astro import angsep
+    mask = np.ones(len(cat), dtype=bool)
+    for i, (ra, dec) in enumerate(cat['ALPHA_J2000','DELTA_J2000']):
+        # don't search objects flagged as double entries
+        if mask[i]==True:
+            seps = angsep(ra, dec, cat['ALPHA_J2000'], cat['DELTA_J2000'])
+            unique = seps > min_sep
+            unique[i] = True # it will certainly match itself
+            mask &= unique   # double entries set to False
+    return mask
