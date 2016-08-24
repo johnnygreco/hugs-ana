@@ -75,10 +75,12 @@ def nearest_group(ra, dec, print_info=True, groups=None):
     ----------
     ra, dec : floats
         The ra and dec to search around. 
-    print_info : bool
+    print_info : bool, optional
         If True, print the properties of the nearest 
         group. Else, return the properties. 
-    groups : astropy.table.Table
+    groups : astropy.table.Table, optional
+        The group catalog to search in. If None, 
+        will call load_yang_groups.
         
     Returns
     -------
@@ -87,7 +89,8 @@ def nearest_group(ra, dec, print_info=True, groups=None):
         is returned.
     """
     from toolbox.astro import angsep
-    groups = load_yang_groups()
+    if groups is None:
+        groups = load_yang_groups()
     seps = angsep(ra, dec, groups['ra'], groups['dec'])
     nearest = groups[seps.argmin()]
     if print_info:
