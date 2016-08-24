@@ -13,7 +13,9 @@ dataDIR = os.environ.get('DATA_DIR')
 yangDIR = os.path.join(dataDIR, 'catalogs/Yang')
 lauerDIR = os.path.join(dataDIR, 'catalogs/Lauer')
 plt.style.use('jpg')
-Ngal_min = 4
+Ngal_min = 3
+Ngal_max = 15
+max_z = 0.1
 cmap = plt.cm.rainbow
 
 #############################
@@ -21,7 +23,7 @@ cmap = plt.cm.rainbow
 #############################
 fn = os.path.join(dataDIR, 'hsc/ObservedWidePointings.lst')
 f = open(fn)
-band = 'g'
+band = 'i'
 ra = []
 dec = []
 for line in iter(f):
@@ -32,6 +34,7 @@ for line in iter(f):
 ra = np.array(ra)
 dec = np.array(dec)
 out = np.vstack([ra, dec]).T 
+print(len(ra), 'pointings')
 #np.savetxt('output/HSC_wide_pointings.dat', out)
 
 #############################
@@ -52,7 +55,9 @@ ax.set_ylim(-20,75)
 ax.set_xlim(0,360)
 
 yang = Table.read(yangDIR+'/yang_modelC_brightest.txt', format='ascii')
-yang = yang[yang['Ngal'] >= Ngal_min]
+cut = (yang['Ngal'] >= Ngal_min) & (yang['Ngal'] <= Ngal_max)
+cut &= yang['z'] <= max_z 
+yang = yang[cut]
 lauer = Table.read(lauerDIR+'/Lauer.txt', format='ascii')
 
 #ax.scatter(lauer['ra'], lauer['dec'], c='r', marker='s', zorder=10)
@@ -63,5 +68,3 @@ fig.savefig('/Users/protostar/Desktop/groups_in_footprint.png', dpi=300)
 try: import RaiseWindow
 except: pass
 plt.show()
-
-

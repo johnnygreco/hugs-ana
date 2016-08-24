@@ -6,9 +6,12 @@ import os
 import numpy as np
 from astropy.table import Table
 import astropy.units as u
+
+from hugs import yang_r180 as r180
 from toolbox.cosmo import Cosmology
 cosmo = Cosmology()
 catdir = os.path.join(os.environ.get('DATA_DIR'), 'catalogs/Yang')
+h = cosmo.h
 
 def print_info(ids):
 
@@ -29,11 +32,12 @@ def print_info(ids):
         idx = np.argwhere(group_members['group_id']==group_id).T[0]
         positions = group_members['ra', 'dec'][idx]
         Ngal = group_members['Ngal'][idx][0]
+        r_180 = r180(10**Mh_L, z)
 
         print('    group', group_id, 'parameters\n-----------------------------')
         print('ra dec = {} {}\nz = {:.5f}\nD_A = {:.3f} Mpc\nD_L = {:.3f} Mpc\
-               \n1\'\'= {:.3f} kpc\nNgal = {}\nMh_Lest = {}\nMh_Mest = {}\n'.\
-               format(ra,dec,z,D_A,D_L,u.arcsec.to('radian')*D_A*1e3,Ngal,Mh_L,Mh_M))
+               \n1\'\'= {:.3f} kpc\nNgal = {}\nMh_Lest = {}\nMh_Mest = {}\nr_180 = {} Mpc'.\
+               format(ra,dec,z,D_A,D_L,u.arcsec.to('radian')*D_A*1e3,Ngal,Mh_L,Mh_M,r_180))
         print('   galaxy member positions\n-----------------------------')
         print(positions)
         print()

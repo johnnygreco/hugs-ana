@@ -34,7 +34,8 @@ class MyButtons(object):
         plt.close()
     def get_info(self, event):
         print(cat['ALPHA_J2000', 'DELTA_J2000', 'MAG_AUTO',\
-                  'FLUX_RADIUS', 'ISO0', 'SIGMA', 'FLAGS'][i])
+                  'FLUX_RADIUS', 'ISO0', 'SIGMA', 'FLAGS',\
+                  'MU_APER_2', 'MU_APER_4'][i])
     def save(self, event):
         print('saving image...')
         f.savefig('../figures/group_'+args.group_id+'_cand'+str(i)+'.pdf')

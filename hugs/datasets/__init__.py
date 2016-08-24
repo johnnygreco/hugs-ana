@@ -1,1 +1,1 @@
-from ._load import *
+from ._yang import *

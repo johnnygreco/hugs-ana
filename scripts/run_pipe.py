@@ -58,6 +58,7 @@ def build_final_cat(group_id, min_sep=0.7, random=False):
     for f in files_full_cat:
         band, tract, patch = f.split('_')[0][-1], f.split('_')[1], f.split('_')[2]
         temptab = Table.read(os.path.join(results_dir, f), format='ascii')
+        temptab['group_id'] = [int(group_id)]*len(temptab)
         temptab['band'] = [band]*len(temptab)
         temptab['tract'] = [int(tract)]*len(temptab)
         temptab['patch'] = [patch]*len(temptab)
