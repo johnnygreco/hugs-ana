@@ -7,7 +7,7 @@ from astropy.table import Table
 yangdir = os.path.join(os.environ.get('DATA_DIR'), 'catalogs/Yang')
 
 __all__ = ['load_yang_groups', 'load_yang_gals',
-           'load_yang_bcgs', 'get_group_prop']
+           'load_yang_bcgs', 'get_group_prop', 'nearest_group']
 
 def load_yang_groups():
     """
@@ -65,3 +65,33 @@ def get_group_prop(group_id, keys):
     """
     tab = load_yang_groups()
     return tab[keys][int(group_id)-1]
+
+
+def nearest_group(ra, dec, print_info=True, groups=None):
+    """
+    Find the nearest Yang group to the given coords.
+
+    Parameters
+    ----------
+    ra, dec : floats
+        The ra and dec to search around. 
+    print_info : bool
+        If True, print the properties of the nearest 
+        group. Else, return the properties. 
+    groups : astropy.table.Table
+        
+    Returns
+    -------
+    group : astropy.table.Table
+        If print_info is False, the nearest group info
+        is returned.
+    """
+    from toolbox.astro import angsep
+    groups = load_yang_groups()
+    seps = angsep(ra, dec, groups['ra'], groups['dec'])
+    nearest = groups[seps.argmin()]
+    if print_info:
+        print(nearest)
+        print('angular separation =', seps.min(), 'arcsec')
+    else:
+        return nearest
