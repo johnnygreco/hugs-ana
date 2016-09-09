@@ -95,9 +95,9 @@ def meas_back(img, size, ffrac=0.5, mask=None, sub_from_img=True):
         return bkg
 
 
-def detect_sources(img, sig, thresh, backsize, backffrac=0.5, mask=None, 
-                   minarea=5, kern='default', ftype='matched', 
-                   deblend_nthresh=32, deblend_cont=0.005, clean=True, 
+def detect_sources(img, thresh, backsize, backffrac=0.5, sig=None, 
+                   mask=None, minarea=5, kern='default', ftype='matched', 
+                   db_nthr=32, db_cont=0.005, clean=True, 
                    clean_param=1.0, return_all=False):
     """
     Detect sources to construct a mask for photometry. 
@@ -121,7 +121,7 @@ def detect_sources(img, sig, thresh, backsize, backffrac=0.5, mask=None,
     obj, seg = sep.extract(
         img, thresh, err=sig, filter_kernel=kern, filter_type=ftype, 
         segmentation_map=True, clean=True, clean_param=1.0, 
-        deblend_cont=deblend_cont, deblend_nthresh=deblend_nthresh)
+        deblend_cont=db_cont, deblend_nthresh=db_nthr)
     return (obj, seg, bkg, img) if return_all else (obj, seg)
 
 
@@ -185,8 +185,8 @@ def _combine_cats(hot, cold, tol=6.0, keepH=True):
     return objComb
 
 
-def hot_n_cold(img, sig, tholds, bsizes, ntholds, contrasts, backffrac=0.5, 
-               mask=None, minarea=5, kern='default', ftype='matched', 
+def hot_n_cold(img, tholds, bsizes, ntholds, contrasts, backffrac=0.5, 
+               sig=None, mask=None, minarea=5, kern='default', ftype='matched', 
                clean=True, clean_param=1.0, tol=6, keep_hot=False, 
                return_all=False):
     """
@@ -208,25 +208,23 @@ def hot_n_cold(img, sig, tholds, bsizes, ntholds, contrasts, backffrac=0.5,
     imgH = img.copy()
     backsize = bsizes[0]
     thresh = tholds[0]
-    deblend_nthresh = ntholds[0]
-    deblend_cont = contrasts[0]
+    db_nthr = ntholds[0]
+    db_cont = contrasts[0]
     objH, segH, bkgH, imgH = detect_sources(
-        imgH, sig, thresh, backsize, backffrac=backffrac, mask=mask, 
-        minarea=minarea, kern=kern, ftype=ftype, 
-        deblend_nthresh=deblend_nthresh, deblend_cont=deblend_cont, 
-        clean=clean, clean_param=clean_param, return_all=True)
+        imgH, thresh, backsize, backffrac=backffrac, sig=sig, mask=mask, 
+        minarea=minarea, kern=kern, ftype=ftype, db_nthr=db_nthr, 
+        db_cont=db_cont, clean=clean, clean_param=clean_param, return_all=True)
 
     # cold run
     imgC = img.copy()
     backsize = bsizes[1]
     thresh = tholds[1]
-    deblend_nthresh = ntholds[1]
-    deblend_cont = contrasts[1]
+    db_nthr = ntholds[1]
+    db_cont = contrasts[1]
     objC, segC, bkgC, imgC = detect_sources(
-        imgC, sig, thresh, backsize, backffrac=backffrac, mask=mask, 
-        minarea=minarea, kern=kern, ftype=ftype, 
-        deblend_nthresh=deblend_nthresh, deblend_cont=deblend_cont, 
-        clean=clean, clean_param=clean_param, return_all=True)
+        imgC, thresh, backsize, backffrac=backffrac, sig=sig, mask=mask, 
+        minarea=minarea, kern=kern, ftype=ftype, db_nthr=db_nthr, 
+        db_cont=db_cont, clean=clean, clean_param=clean_param, return_all=True)
 
     cat_final = _combine_cats(objH, objC, tol, keep_hot)
 
