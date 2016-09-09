@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import numpy as np
 
-__all__ = ['pixscale', 'apply_cuts', 'bit_dict', 
+__all__ = ['pixscale', 'apply_cuts', 'bit_dict', 'bit_flag_dict', 
            'get_bitmask_flags', 'yang_r180', 'doubles_mask']
 
 pixscale = 0.168 # arcsec/pixel
@@ -80,6 +80,8 @@ bit_dict =  {1: 'BAD',                # Pixel is physically bad (a known camera 
              2048: 'CROSSTALK',       # Pixel location affected by crosstalk (and corrected)
              4096: 'NOT_DEBLENDED',   # 
              8192: 'UNMASKEDNAN'}     # A NaN occurred in this pixel in ISR (instrument signature removal - bias,flat,etc)
+
+bit_flag_dict = dict((v,k) for k,v in bit_dict.items())
 
 
 def get_bitmask_flags(decimal_sum):
