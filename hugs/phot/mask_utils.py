@@ -5,6 +5,8 @@ SEP is used extensively throughout: https://sep.readthedocs.io
 The logic and structure of these functions were heavily inspired 
 by Song Huang's work: https://github.com/dr-guangtou/hs_hsc/py
 """
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import numpy  as np
 import scipy.ndimage as ndimage
@@ -12,7 +14,7 @@ import scipy.ndimage as ndimage
 import sep
 
 __all__ = ['meas_back', 'detect_sources', 'hot_n_cold', 
-           'seg_mask', 'obj_mask']
+           'make_seg_mask', 'make_obj_mask']
 
 
 def _byteswap(arr):
@@ -25,7 +27,7 @@ def _byteswap(arr):
     return arr
 
 
-def seg_mask(seg, grow_sig=6.0, mask_thresh=0.01, mask_max=1000.0):
+def make_seg_mask(seg, grow_sig=6.0, mask_thresh=0.01, mask_max=1000.0):
     """
     Make mask from segmentation images. 
 
@@ -42,9 +44,9 @@ def seg_mask(seg, grow_sig=6.0, mask_thresh=0.01, mask_max=1000.0):
     return mask.astype(int)
 
 
-def obj_mask(cat, img_shape, grow_r=1.0):
+def make_obj_mask(cat, img_shape, grow_r=1.0):
     """
-    Use SEP to build a mask based on objects input catalog.
+    Use SEP to build a mask based on objects in input catalog.
 
     Parameters
     ----------
