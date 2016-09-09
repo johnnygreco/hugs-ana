@@ -7,12 +7,13 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from astropy.io import fits
 
-__all__=['open_me_fits', 'bg_sub', 'gen_sky_noise', 'replace_with_sky']
+__all__=['open_fits', 'bg_sub', 'gen_sky_noise', 'replace_with_sky']
 
-def open_me_fits(fn):
+def open_fits(fn, muilti_ext=True):
     """
-    Open a multi-extension fits file, where we assume the structure is
-    f[0], f[1], f[2], f[3] = header, image, mask, variance. 
+    Get data from fits file. If a multi-extension fits file, 
+    we assume the structure is f[0], f[1], f[2], f[3] = header, 
+    image, mask, variance. 
 
     Parameters
     ----------
@@ -27,9 +28,13 @@ def open_me_fits(fn):
         The header associated with the image.
     """
     hdulist = fits.open(fn)
-    img, mask, var = hdulist[1].data, hdulist[2].data, hdulist[3].data
-    img_head = hdulist[1].header
-    return img, mask, var, img_head
+    if muilti_ext:
+        img, mask, var = hdulist[1].data, hdulist[2].data, hdulist[3].data
+        img_head = hdulist[1].header
+    else:
+        img = hdulist[0].data
+        img_head = hdulist[0].header
+    return (img, mask, var, img_head) if muilti_ext else (img, img_head)
 
 def bg_sub(img_file, bg_file, write=None):
     """
