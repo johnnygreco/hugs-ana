@@ -11,10 +11,10 @@ def _outside_circle(cat, xc, yc, r):
     return np.sqrt((cat['x']-xc)**2 + (cat['y']-yc)**2) > r
 
 def make_phot_mask(img, thresh, backsize, backffrac=0.5, sig=None, mask=None, 
-              minarea=5, kern='default', ftype='matched', db_nthr=32, 
-              db_cont=0.005, clean=True, clean_param=1.0, gal_pos='center', 
-              seg_rmin=100.0, obj_rmin=15.0, grow_sig=5.0, mask_thresh=0.01, 
-              grow_obj=4.5):
+                   minarea=5, kern='default', ftype='matched', db_nthr=32, 
+                   db_cont=0.005, clean=True, clean_param=1.0, 
+                   gal_pos='center', seg_rmin=100.0, obj_rmin=15.0, 
+                   grow_sig=5.0, mask_thresh=0.01, grow_obj=4.5):
     """
     Parameters
     ----------

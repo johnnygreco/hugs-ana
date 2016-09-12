@@ -18,25 +18,25 @@ outdir = os.path.join(os.environ.get('DROP_DIR'),
 
 def main(fn, thresh, backsize, gal_pos='center', visualize=False):
     try:
-        img, mask, var, img_head = hugs.imtools.open_fits(fn)
+        img_head, img, mask, var = hugs.imtools.open_fits(fn)
         sig = np.sqrt(var) # not currently using sigma image
     except IndexError:
         print('Fits file not a multi-extension cube.')
         print('Continuing without an initial mask.')
-        img, img_head = hugs.imtools.open_fits(fn, False)
+        img_head, img = hugs.imtools.open_fits(fn, False)
         mask = None
         sig = None
+    img0 = img.copy()
     phot_mask = hugs.phot.make_phot_mask(
-        img, thresh, backsize, gal_pos=gal_pos, mask=mask)
+        img, thresh, backsize, gal_pos=gal_pos, mask=mask, grow_obj=3.,
+        grow_sig=6, db_nthr=32, db_cont=0.001, mask_thresh=0.02, obj_rmin=20)
+    assert np.allclose(img0, img)
     if visualize:
         hugs.phot.viz.overlay_mask(img, phot_mask)
-    
-    # create masked image for ellipse
-    img_ell = img.copy()
-    img_ell[phot_mask>0] = np.nan
-    img_ell_fn = os.path.join(outdir, 'img_masked_ell.fits')
-    print('writing', img_ell_fn)
-    fits.writeto(img_ell_fn, img_ell, img_head, clobber=True)
+
+    fits.writeto('/Users/protostar/Desktop/test_imfit/mask.fits', phot_mask, img_head, clobber=True)
+
+
 
 
 if __name__=='__main__':
@@ -44,13 +44,13 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('file', type=str, help='Fits file name')
     parser.add_argument('--thresh', type=float, 
-                        help='Detection threshold', default=1.5)
+                        help='Mask detection threshold', default=1.5)
     parser.add_argument('--backsize', type=int, 
-                        help='Background box size', default=100)
+                        help='Mask background box size', default=100)
     parser.add_argument('--db_nthr', type=float, 
-                        help='Deblending num thresholds', default=32)
+                        help='Mask deblending num thresholds', default=32)
     parser.add_argument('--db_cont', type=float, 
-                        help='Deblending contrast', default=0.005)
+                        help='Mask deblending contrast', default=0.005)
     parser.add_argument('--viz', action='store_true',
                         help='Visualize results', default=False)
     parser.add_argument('--gal_pos', type=str, 
@@ -58,5 +58,4 @@ if __name__=='__main__':
     args = parser.parse_args()
     if args.gal_pos!='center':
         args.gal_pos = [float(p) for p in args.gal_pos.split(',')]
-    main(args.file, args.thresh, args.backsize, visualize=args.viz, gal_pos=args.gal_pos)
-
+    main(args.file, args.thresh, args.backsize, args.gal_pos, args.viz)

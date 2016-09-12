@@ -34,7 +34,7 @@ def open_fits(fn, muilti_ext=True):
     else:
         img = hdulist[0].data
         img_head = hdulist[0].header
-    return (img, mask, var, img_head) if muilti_ext else (img, img_head)
+    return (img_head, img, mask, var) if muilti_ext else (img_head, img)
 
 def bg_sub(img_file, bg_file, write=None):
     """
