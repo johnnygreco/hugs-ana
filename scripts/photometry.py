@@ -27,9 +27,11 @@ def main(fn, thresh, backsize, gal_pos='center', visualize=False):
         mask = None
         sig = None
     img0 = img.copy()
+
+    params = {'deblend_nthresh': 16, 'deblend_cont': 0.001, 'minarea': 5}
     phot_mask = hugs.phot.make_phot_mask(
         img, thresh, backsize, gal_pos=gal_pos, mask=mask, grow_obj=3.,
-        grow_sig=6, db_nthr=32, db_cont=0.001, mask_thresh=0.02, obj_rmin=20)
+        grow_sig=6, mask_thresh=0.02, obj_rmin=20, sep_extract_params=params)
     assert np.allclose(img0, img)
     if visualize:
         hugs.phot.viz.overlay_mask(img, phot_mask)
