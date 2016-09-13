@@ -32,6 +32,8 @@ def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,
         If True, save the model fits image.
     save_res : bool
         If True, save a residual fits image.
+    out_fn : string
+        Output file name for best-fit params.
     """
     import subprocess
     cmd = "imfit '"+img_fn+"' -c "+config_fn+" "
