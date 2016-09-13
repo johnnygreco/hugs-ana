@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import os
 
-__all__ = ['run', 'write_config', 'read_results']
+__all__ = ['SERSIC_PARAMS', 'run', 'write_config', 'read_results']
 
 # do not change parameter order
 SERSIC_PARAMS = ['X0', 'Y0', 'PA', 'ell', 'n', 'I_e', 'r_e']
@@ -124,6 +124,6 @@ def read_results(fn, model='sersic'):
                            c.split()[1]=='Reduced'][0].split()[-1])
     results = {'reduced_chisq': float(reduced_chisq)}
     if model=='sersic':
-        for i in range(6):
+        for i in range(7):
             results.update({SERSIC_PARAMS[i]: float(params[i].split()[1])})
     return results
