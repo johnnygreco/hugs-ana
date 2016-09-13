@@ -15,7 +15,6 @@ import sep
 
 from .._utils import bit_flag_dict
 
-
 __all__ = ['meas_back', 'detect_sources', 'make_seg_mask', 
            'make_obj_mask', 'make_phot_mask']
 
@@ -40,13 +39,25 @@ def _outside_circle(cat, xc, yc, r):
 
 def make_seg_mask(seg, grow_sig=6.0, mask_thresh=0.01, mask_max=1000.0):
     """
-    Make mask from segmentation images. 
+    Make mask from segmentation image. The mask is convolved with 
+    a Gaussian to "grow the mask".
 
     Parameters
     ----------
+    seg : 2D ndarray
+        Segmentation map from SEP.
+    grow_sig : float, optional
+        Sigma of Gaussian kernel in pixels. 
+    mask_thresh : float, optional
+        All pixels above this value will be masked.
+    mask_max : float, optional
+        All pixels >0 will be set to this value 
+        prior to the convolution. 
 
     Returns
     -------
+    mask : 2D ndarray
+        Mask with same shape as seg.
     """
     mask = seg.copy()
     mask[mask>0] = mask_max
@@ -61,9 +72,17 @@ def make_obj_mask(cat, img_shape, grow_r=1.0):
 
     Parameters
     ----------
+    cat : astropy.table.Table
+        Source catalog form SEP.
+    img_shape : array-like
+        The shape of the image to be masked.
+    grow_r : float, optional
+        Fraction to grow the objects sizes.  
 
     Returns
     -------
+    mask : 2D ndarray
+        Mask with same shape as img_shape.
     """
     mask = np.zeros(img_shape, dtype='uint8')
     sep.mask_ellipse(mask, cat['x'], cat['y'], cat['a'],
@@ -115,11 +134,37 @@ def detect_sources(img, thresh, backsize, backffrac=0.5, sig=None,
 
     Parameters
     ----------
+    img : 2D ndarray
+        Image to be masked.
+    thresh : float
+        Detection threshold with respect to background 
+        for source extraction. 
+    backsize : int
+        Size of background boxes in pixels.
+    backffrac : float, optional
+        The fraction of background box size for the 
+        filter size for smoothing the background.
+    sig : 2D ndarray, optional
+        Simga image. Must have same shape as img.
+    mask : ndarray, optional
+        Mask to apply before background estimation.
+        Must have same shape as img.
+    return_all : bool, optional
+        If True, return the catalog objects, seg map, 
+        background image, and the background subtracted
+        image. 
 
     Returns
     -------
-    obj : 
-    seg : 
+    obj : astropy.table.Table
+        Source catalog from SEP.
+    seg : 2D ndarray
+        Segmentation map from the source extraction. 
+        Same shape as input image.
+    bck : 2D ndarray, if return_all=True
+        Background image measured by SEP. 
+    img : 2D ndarray, if return_all=True
+        Background subtracted image.
     """
     img = _byteswap(img)
     bkg, img = meas_back(img, backsize, backffrac, mask)
