@@ -8,9 +8,10 @@ from toolbox.image import zscale
 from toolbox.utils.plotting import ticks_off
 plt.style.use('jpg')
 
-def overlay_mask(img, mask, cmap=plt.cm.gray_r, contrast=0.25, subplots=None):
+def overlay_mask(img, mask, cmap=plt.cm.gray_r, contrast=0.25, 
+                 subplots=None, figsize=(8,6)):
     if subplots is None:
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=figsize)
     else:
         fig, ax = subplots
     vmin, vmax = zscale(img, contrast=contrast)
