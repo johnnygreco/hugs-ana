@@ -47,6 +47,7 @@ def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,
         value of the fit. 
 
     """
+
     import subprocess
     cmd = "imfit '"+img_fn+"' -c "+config_fn+" "
     if mask_fn is not None:
@@ -90,6 +91,7 @@ def write_config(fn, param_dict):
     Limits are given as a list: [val, val_min, val_max]. If the 
     parameter should be fixed, use [val, 'fixed'].
     """
+
     function = 'Sersic'
     file = open(fn, 'w')
     for p in SERSIC_PARAMS:
@@ -131,6 +133,7 @@ def read_results(fn, model='sersic'):
         value. For Sersic fits, the parameters are 
         ['X0', 'Y0', 'PA', 'ell', 'n', 'I_e', 'r_e'].
     """
+
     file = open(fn, 'r')
     lines = file.readlines()
     file.close()
@@ -145,14 +148,56 @@ def read_results(fn, model='sersic'):
     return results
 
 
-def run_batch():
+def run_batch(img_files, configs, msk_files=None, var_files=None, 
+              batch_name='batch', outdir='', keep_files=False):
     """
     Run imfit in batch mode. 
 
     Parameters
     ----------
+    img_fits : list
+        Image file names.
+    configs : list of dicts
+        Imfit configurations.
+    msk_files : list, optional
+        Mask file names.
+    var_files : list, optional
+        Variance file names.
+    batch_name : string, optional
+        Label for this batch.
+    outdir : string, optional
+        Output directory. 
 
     Returns
     -------
+    results : list of dicts
+        The results for each imfit run.
+
+    Notes
+    -----
+    All of the list must be the same length, since
+    each element is associated with an individual 
+    imfit run. 
     """
-    pass
+
+    if msk_files is None:
+        msk_files = [None]*len(img_files)
+    if var_files is None:
+        var_files = [None]*len(img_files)
+    assert(len(img_files)==len(configs)),\
+           'Number of images and configs do not match'
+
+    loop_items = [img_files, configs, msk_files, var_files]
+    results = []
+
+    for i, (img_fn, config, mask_fn, var_fn) in enumerate(zip(loop_items)):
+        config_fn = os.path.join(outdir, batch_name+'_config_'+str(i)+'.txt')
+        out_fn = os.path.join(outdir, batch_name+'_besfit_'+str(i)+'.txt')
+        write_config(config_fn, config)
+        _result = run(img_fn, config_fn, mask_fn, var_fn, out_fn=out_fn)
+        results.append(_result)
+        if not keep_files:
+            os.remove(config_fn)
+            os.remove(out_fn)
+
+    return results

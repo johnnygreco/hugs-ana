@@ -17,7 +17,7 @@ from astropy.io import fits
 from .._utils import bit_flag_dict
 
 __all__ = ['meas_back', 'detect_sources', 'make_seg_mask', 
-           'make_obj_mask', 'make_phot_mask']
+           'make_obj_mask', 'make_mask', 'make_mask_batch']
 
 
 def _byteswap(arr):
@@ -179,10 +179,10 @@ def detect_sources(img, thresh, backsize, backffrac=0.5, sig=None,
     return (obj, seg, bkg, img) if return_all else (obj, seg)
 
 
-def make_phot_mask(img, thresh, backsize, backffrac=0.5, sig=None, mask=None,
-                   gal_pos='center', seg_rmin=100.0, obj_rmin=15.0, 
-                   grow_sig=5.0, mask_thresh=0.01, grow_obj=4.5, 
-                   mask_from_hsc=True, sep_extract_params={}, out_fn=None):
+def make_mask(img, thresh=1.5, backsize=50, backffrac=0.5, sig=None, mask=None,
+              out_fn=None, gal_pos='center', seg_rmin=100.0, obj_rmin=20.0, 
+              grow_sig=6.0, mask_thresh=0.02, grow_obj=4.5, mask_from_hsc=True, 
+              sep_extract_params={'deblend_nthresh': 16, 'deblend_cont': 0.001}):
     """
     Generate a mask for galaxy photometry using SEP. Many of these
     parameters are those of SEP, so see its documentation for 
@@ -192,7 +192,7 @@ def make_phot_mask(img, thresh, backsize, backffrac=0.5, sig=None, mask=None,
     ----------
     img : 2D ndarray
         Image to be masked.
-    thresh : float
+    thresh : float, optional
         Detection threshold for source extraction.  
     backsize : int
         Size of box for background estimation.
@@ -238,7 +238,6 @@ def make_phot_mask(img, thresh, backsize, backffrac=0.5, sig=None, mask=None,
         a segmentation, object, and (if given) HSC's bad pixel 
         mask. 
     """
-
     if gal_pos=='center':
         gal_x, gal_y = (img.shape[1]/2, img.shape[0]/2)
     else:
@@ -289,3 +288,47 @@ def make_phot_mask(img, thresh, backsize, backffrac=0.5, sig=None, mask=None,
         fits.writeto(out_fn, final_mask, clobber=True)
 
     return final_mask
+
+
+def make_mask_batch(img_files, msk_files='multi-ext', batch_name='batch', 
+                    outdir='', **kwargs):
+    """
+    Run mak_mask in batch mode. 
+
+    Parameters
+    ----------
+    img_files : list
+        Image file names.
+    msk_files : list, optional
+        HSC mask files names. If 'multi-ext', will assume the image
+        files are multi-extension fits files. If None, no HSC mask 
+        will be applied to the final mask. 
+    batch_name : string, optinal
+        Label for this batch.
+    outdir : string, optional
+        Output directory for final masks. 
+    **kwargs : dict, optional
+        Any optional parameter for make_mask. 
+
+    Returns
+    -------
+    final_msk_files : list of strings
+        File names of thefinal masks associated with the images in img_files.
+    """
+    from .. import imtools
+    final_msk_files = []
+    for i, img_fn in enumerate(img_files):
+        if msk_files=='multi-ext':
+            img_head, img, mask, var = imtools.open_fits(img_fn)
+        elif type(msk_files) is list:
+            img_head, img = imtools.open_fits(img_fn, False)
+            msk_head, mask = imtools.open_fits(msk_files[i], False)
+        elif msk_files is None:
+            img_head, img = imtools.open_fits(img_fn, False)
+            mask = None
+        else:
+            raise Exception('Invalid msk_files given.')
+        out_fn = os.path.join(outdir, batch_name+'_'+str(i)+'.fits')
+        make_mask(img, mask=mask, out_fn=out_fn, **kwargs)
+        final_msk_files.append(out_fn)
+    return final_msk_files
