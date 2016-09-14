@@ -6,14 +6,16 @@ from __future__ import (absolute_import, division, print_function,
 
 import os
 
-__all__ = ['SERSIC_PARAMS', 'run', 'write_config', 'read_results']
+__all__ = ['SERSIC_PARAMS', 'run', 'write_config', 
+           'read_results', 'run_batch']
+
 
 # do not change parameter order
 SERSIC_PARAMS = ['X0', 'Y0', 'PA', 'ell', 'n', 'I_e', 'r_e']
 
 
 def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,  
-        save_res=False, out_fn='bestfit_imfit_params.dat'):
+        save_res=False, out_fn='bestfit_imfit_params.dat', config=None):
     """
     Run imfit.
 
@@ -28,14 +30,19 @@ def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,
         >1 for bad pixels.
     var_fn : string, optional
         Variance map fits file name. 
-    save_model : bool
+    save_model : bool, optional
         If True, save the model fits image.
-    save_res : bool
+    save_res : bool, optional
         If True, save a residual fits image.
-    out_fn : string
+    out_fn : string, optional
         Output file name for best-fit params.
+    config : dict, optional
+        Configuration parameters to be written to config_fn. If None, 
+        will assume config_fn already exists.
     """
     import subprocess
+    if config is not None:
+        write_config(config_fn, config)
     cmd = "imfit '"+img_fn+"' -c "+config_fn+" "
     if mask_fn is not None:
         cmd += "--mask '"+mask_fn+"' "
@@ -127,3 +134,16 @@ def read_results(fn, model='sersic'):
         for i in range(7):
             results.update({SERSIC_PARAMS[i]: float(params[i].split()[1])})
     return results
+
+
+def run_batch():
+    """
+    Run imfit in batch mode. 
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    """
+    pass
