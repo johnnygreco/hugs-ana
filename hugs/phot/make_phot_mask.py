@@ -12,6 +12,7 @@ import numpy as np
 import scipy.ndimage as ndimage
 
 import sep
+from astropy.io import fits
 
 from .._utils import bit_flag_dict
 
@@ -181,7 +182,7 @@ def detect_sources(img, thresh, backsize, backffrac=0.5, sig=None,
 def make_phot_mask(img, thresh, backsize, backffrac=0.5, sig=None, mask=None,
                    gal_pos='center', seg_rmin=100.0, obj_rmin=15.0, 
                    grow_sig=5.0, mask_thresh=0.01, grow_obj=4.5, 
-                   mask_from_hsc=True, sep_extract_params={}):
+                   mask_from_hsc=True, sep_extract_params={}, out_fn=None):
     """
     Generate a mask for galaxy photometry using SEP. Many of these
     parameters are those of SEP, so see its documentation for 
@@ -226,6 +227,8 @@ def make_phot_mask(img, thresh, backsize, backffrac=0.5, sig=None, mask=None,
         we mean parameters that are not given as input to 
         this function: 
         (http://sep.readthedocs.io/en/v0.6.x/api/sep.extract.html)
+    out_fn : string, optional
+        If not None, save the mask with this file name. 
         
     Returns
     -------
@@ -281,5 +284,8 @@ def make_phot_mask(img, thresh, backsize, backffrac=0.5, sig=None, mask=None,
     seg_mask = make_seg_mask(seg, grow_sig, mask_thresh)
     obj_mask = make_obj_mask(obj, img.shape, grow_obj)
     final_mask = (seg_mask | obj_mask | hsc_bad_mask).astype(int)
+
+    if out_fn is not None:
+        fits.writeto(out_fn, final_mask, clobber=True)
 
     return final_mask
