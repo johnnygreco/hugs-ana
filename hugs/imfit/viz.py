@@ -18,13 +18,13 @@ from toolbox.utils.plotting import ticks_off
 __all__ = ['imfit_results']
 
 def img_mod_res(img_fn, mod_params, cmap=plt.cm.gray_r, save_fn=None,
-                show=True, band='i'):
+                show=True, band='i', **kwargs):
     """
     Show imfit results: image, model, and residual.
     """
     img = fits.getdata(img_fn)
 
-    fig, axes = plt.subplots(1, 3, figsize=(16,5))
+    fig, axes = plt.subplots(1, 3, **kwargs)
     fig.subplots_adjust(wspace=0.05)
 
     s = Sersic(mod_params)
@@ -40,13 +40,13 @@ def img_mod_res(img_fn, mod_params, cmap=plt.cm.gray_r, save_fn=None,
         ticks_off(axes[i])
         axes[i].imshow(data, vmin=vmin, vmax=vmax, origin='lower', 
                        cmap=cmap, aspect='equal', rasterized=True)
-        axes[i].set_title(titles[i], fontsize=18)
+        axes[i].set_title(titles[i], fontsize=20, y=1.01)
 
     x = 0.05
     y = 0.93
     dy = 0.08
     dx = 0.63
-    fs = 15
+    fs = 17
     m_tot = r'$m_'+band+'='+str(round(s.m_tot, 1))+'$'
     r_e = r'$r_\mathrm{eff}='+str(round(s.r_e*pixscale,1))+'^{\prime\prime}$'
     mu_0 = r'$\mu_0='+str(round(s.mu_0,1))+'$ mag/arcsec$^2$'

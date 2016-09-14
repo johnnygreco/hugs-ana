@@ -9,9 +9,9 @@ from toolbox.utils.plotting import ticks_off
 plt.style.use('jpg')
 
 def overlay_mask(img, mask, cmap=plt.cm.gray_r, contrast=0.25, 
-                 subplots=None, figsize=(8,6)):
+                 subplots=None, **kwargs):
     if subplots is None:
-        fig, ax = plt.subplots(figsize=figsize)
+        fig, ax = plt.subplots(**kwargs)
     else:
         fig, ax = subplots
     vmin, vmax = zscale(img, contrast=contrast)

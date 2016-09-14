@@ -39,10 +39,15 @@ def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,
     config : dict, optional
         Configuration parameters to be written to config_fn. If None, 
         will assume config_fn already exists.
+
+    Returns
+    -------
+    results : dict
+        Imfit's best-fit parameters and the reduced chi-square
+        value of the fit. 
+
     """
     import subprocess
-    if config is not None:
-        write_config(config_fn, config)
     cmd = "imfit '"+img_fn+"' -c "+config_fn+" "
     if mask_fn is not None:
         cmd += "--mask '"+mask_fn+"' "
@@ -57,7 +62,11 @@ def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,
         res_fn += '_res.fits'
         cmd += '--save-residual '+res_fn+' '
     cmd += '--save-params '+out_fn
+    if config is not None:
+        write_config(config_fn, config)
     subprocess.call(cmd, shell=True)
+    results = read_results(out_fn)
+    return results
 
 
 def write_config(fn, param_dict):
