@@ -6,10 +6,11 @@ import numpy as np
 from astropy.table import Table
 yangdir = os.path.join(os.environ.get('DATA_DIR'), 'catalogs/Yang')
 
-__all__ = ['load_yang_groups', 'load_yang_gals',
-           'load_yang_bcgs', 'get_group_prop', 'nearest_group']
+__all__ = ['load_groups', 'load_gals', 'load_bcgs', 
+           'get_group_prop', 'nearest_group']
 
-def load_yang_groups():
+
+def load_groups():
     """
     Return an astropy table of parameters for Yang groups.
     """
@@ -21,7 +22,7 @@ def load_yang_groups():
     return groups
 
 
-def load_yang_gals():
+def load_gals():
     """
     Return an astropy table of parameters for galaxy members of 
     Yang groups. The table is sorted by group id.
@@ -34,7 +35,7 @@ def load_yang_gals():
     return members
 
 
-def load_yang_bcgs():
+def load_bcgs():
     """
     Return an astropy table of parameters for BCGs
     Yang groups. The table is sorted by group id.
@@ -63,7 +64,7 @@ def get_group_prop(group_id, keys):
     vals : float or table
         The group properties.
     """
-    tab = load_yang_groups()
+    tab = load_groups()
     return tab[keys][int(group_id)-1]
 
 
@@ -80,7 +81,7 @@ def nearest_group(ra, dec, print_info=True, groups=None):
         group. Else, return the properties. 
     groups : astropy.table.Table, optional
         The group catalog to search in. If None, 
-        will call load_yang_groups.
+        will call load_groups.
         
     Returns
     -------
@@ -90,7 +91,7 @@ def nearest_group(ra, dec, print_info=True, groups=None):
     """
     from toolbox.astro import angsep
     if groups is None:
-        groups = load_yang_groups()
+        groups = load_groups()
     seps = angsep(ra, dec, groups['ra'], groups['dec'])
     nearest = groups[seps.argmin()]
     if print_info:
@@ -98,3 +99,27 @@ def nearest_group(ra, dec, print_info=True, groups=None):
         print('angular separation =', seps.min(), 'arcsec')
     else:
         return nearest
+
+
+def r180(log10_Mh, z, h=0.693):
+    """
+    Virial radius of a group given its halo mass
+    and redshift. From Yang et al. 2007.
+
+    Parameters
+    ----------
+    log10_Mh : float
+        Logarithm of halo mass in Solar masses.
+    z : float
+        Redshift to galaxy group.
+    h : float, optional
+        Little h. Uses WMAP9 value by default.
+
+    Returns
+    -------
+    r180 : float
+        The groups virial radius in Mpc.
+    """
+    Mh = 10**log10_Mh
+    r180 = (1.26/h)*(Mh/(1.0e14/h))**(1.0/3.0)/(1+z) # Mpc
+    return r180

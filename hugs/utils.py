@@ -7,7 +7,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 
 __all__ = ['pixscale', 'apply_cuts', 'bit_dict', 'bit_flag_dict', 
-           'get_bitmask_flags', 'yang_r180', 'doubles_mask']
+           'get_bitmask_flags', 'doubles_mask']
 
 pixscale = 0.168 # arcsec/pixel
 
@@ -103,29 +103,6 @@ def get_bitmask_flags(decimal_sum):
     on_bits = decimal_mask_vals[(decimal_sum & decimal_mask_vals)!=0]
     flags = [bit_dict[b] for b in on_bits]
     return flags 
-
-
-def yang_r180(Mh, z, h=0.693):
-    """
-    Virial radius of a group given its halo mass
-    and redshift. From Yang et al. 2007.
-
-    Parameters
-    ----------
-    Mh : float
-        Halo mass in Solar masses.
-    z : float
-        Redshift to galaxy group.
-    h : float, optional
-        Little h. Uses WMAP9 value by default.
-
-    Returns
-    -------
-    r180 : float
-        The groups virial radius.
-    """
-    r180 = (1.26/h)*(Mh/(1.0e14/h))**(1.0/3.0)/(1+z) # Mpc
-    return r180
 
 
 def doubles_mask(cat, min_sep=0.7):

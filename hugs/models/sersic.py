@@ -5,7 +5,7 @@ import numpy as np
 from scipy.special import gammaincinv, gamma
 
 from ..imfit import SERSIC_PARAMS
-from .._utils import pixscale
+from ..utils import pixscale
 
 __all__ = ['Sersic']
 

@@ -1,1 +1,1 @@
-from ._yang import *
+from . import yang

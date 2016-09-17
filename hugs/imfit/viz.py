@@ -10,7 +10,7 @@ from astropy.io import fits
 from astropy.visualization import ZScaleInterval
 
 from ..models import Sersic
-from .._utils import pixscale
+from ..utils import pixscale
 zscale = ZScaleInterval().get_limits
 plt.style.use('jpg')
 from toolbox.utils.plotting import ticks_off
