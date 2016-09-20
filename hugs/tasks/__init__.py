@@ -1,1 +1,1 @@
-from .fit_gals import *
+from .fit_gal import *

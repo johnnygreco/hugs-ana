@@ -54,6 +54,8 @@ class Sersic(object):
         self.mu_e_ave = self.mu_e - 2.5*np.log10(f_n)
         A_eff = np.pi*(self.r_circ*pixscale)**2
         self.m_tot = self.mu_e_ave - 2.5*np.log10(2*A_eff)
+        if 'reduced_chisq' in list(params.keys()):
+            self.reduced_chisq = params['reduced_chisq']
 
     def array(self, shape, logscale=False):
         """

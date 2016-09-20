@@ -25,7 +25,7 @@ def _byteswap(arr):
     If array is in big-endian byte order (as astropy.io.fits
     always returns), swap to little-endian for SEP.
     """
-    if arr.dtype.byteorder is '>':
+    if arr.dtype.byteorder=='>':
         arr = arr.byteswap().newbyteorder()
     return arr
 
@@ -175,7 +175,6 @@ def detect_sources(img, thresh, backsize, backffrac=0.5, sig=None,
         sig = _byteswap(sig)
     obj, seg = sep.extract(img, thresh, err=sig,
                            segmentation_map=True, **kwargs)
-
     return (obj, seg, bkg, img) if return_all else (obj, seg)
 
 
@@ -288,47 +287,3 @@ def make_mask(img, thresh=1.5, backsize=50, backffrac=0.5, sig=None, mask=None,
         fits.writeto(out_fn, final_mask, clobber=True)
 
     return final_mask
-
-
-def make_mask_batch(img_files, msk_files='multi-ext', batch_name='batch', 
-                    outdir='', **kwargs):
-    """
-    Run mak_mask in batch mode. 
-
-    Parameters
-    ----------
-    img_files : list
-        Image file names.
-    msk_files : list, optional
-        HSC mask files names. If 'multi-ext', will assume the image
-        files are multi-extension fits files. If None, no HSC mask 
-        will be applied to the final mask. 
-    batch_name : string, optinal
-        Label for this batch.
-    outdir : string, optional
-        Output directory for final masks. 
-    **kwargs : dict, optional
-        Any optional parameter for make_mask. 
-
-    Returns
-    -------
-    final_msk_files : list of strings
-        File names of thefinal masks associated with the images in img_files.
-    """
-    from .. import imtools
-    final_msk_files = []
-    for i, img_fn in enumerate(img_files):
-        if msk_files=='multi-ext':
-            img_head, img, mask, var = imtools.open_fits(img_fn)
-        elif type(msk_files) is list:
-            img_head, img = imtools.open_fits(img_fn, False)
-            msk_head, mask = imtools.open_fits(msk_files[i], False)
-        elif msk_files is None:
-            img_head, img = imtools.open_fits(img_fn, False)
-            mask = None
-        else:
-            raise Exception('Invalid msk_files given.')
-        out_fn = os.path.join(outdir, batch_name+'_'+str(i)+'.fits')
-        make_mask(img, mask=mask, out_fn=out_fn, **kwargs)
-        final_msk_files.append(out_fn)
-    return final_msk_files
