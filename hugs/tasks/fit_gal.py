@@ -53,12 +53,12 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
         Fits file name of image (can be multi-extension).
     mask_fn : int, str, or None, optional
         If int, the index of the hdulist in img_fn. If str, 
-        the fits file name of the mask. If None, mask will be used 
-        when making the photometry mask.
+        the fits file name of the mask. If None, no initial mask 
+        will be used when making the photometry mask.
     var_fn : int, str, or None, optional
         If int, the index of the hdulist in img_fn. If str, 
         the fits file name of the variance. If None, the variance
-        will not be used with imfit.
+        will not be used.
     gal_pos : array-like, optional
         The position of the galaxy of interest in pixels. If 'center', 
         then the center of the image will be assumed.
@@ -85,16 +85,16 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
         
     Notes
     -----
-    If you want to use the variance map when making the photometry
-    mask, pass sig=True as a kwargs. By default, this is set to False.
-    If using a multi-extension fits file, then the image, mask and 
-    variance must be in this file. 
+    - If you want to use the variance map when making the photometry
+      mask, pass sig=True as a kwargs. By default, this is set to False.
+    - If using a multi-extension fits file, then the image, mask and 
+      variance must be in the same fits file. 
     """
 
     ######################################################################
     # Setup image file names for imfit, and get the ndarrays for SEP. 
-    # If the image file as a multi-extension fits file, the file names 
-    # become 'file.fits[index]'.  
+    # If the image file is a multi-extension fits file, the file names 
+    # become 'file.fits[hdu_index]'.  
     ######################################################################
 
     if (type(mask_fn)!=str) and (type(var_fn)!=str):
