@@ -6,8 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import os
 
-__all__ = ['SERSIC_PARAMS', 'run', 'write_config', 
-           'read_results', 'run_batch']
+__all__ = ['SERSIC_PARAMS', 'run', 'write_config', 'read_results']
 
 
 # do not change parameter order

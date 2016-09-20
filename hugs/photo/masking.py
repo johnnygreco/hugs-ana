@@ -17,7 +17,7 @@ from astropy.io import fits
 from ..utils import bit_flag_dict
 
 __all__ = ['meas_back', 'detect_sources', 'make_seg_mask', 
-           'make_obj_mask', 'make_mask', 'make_mask_batch']
+           'make_obj_mask', 'make_mask']
 
 
 def _byteswap(arr):
