@@ -63,7 +63,7 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
         The position of the galaxy of interest in pixels. If 'center', 
         then the center of the image will be assumed.
     init_params : dict, optional
-        Intial imfit paramters that are different from defaults given 
+        Initial imfit parameters that are different from defaults given 
         by DEFAULT_PARAMS.
     prefix : str, optional
         Prefix for all files generate by this function. Can include
@@ -80,7 +80,7 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
     Returns
     -------
     sersic : hugs.models.Sersic 
-        Obeject containing the best-fit sersic model and associated
+        Object containing the best-fit sersic model and associated
         derived parameters.
         
     Notes
