@@ -99,9 +99,9 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
 
     if (type(mask_fn)!=str) and (type(var_fn)!=str):
         header, img, mask, var = imtools.open_fits(img_fn)
-        img_fn = img_fn+'['+str(img_hdu)+']' 
         mask_fn = img_fn+'['+str(mask_fn)+']' if mask_fn else None
         var_fn = img_fn+'['+str(var_fn)+']' if var_fn else None
+        img_fn = img_fn+'['+str(img_hdu)+']' 
     elif (type(mask_fn)!=int) and (type(var_fn)!=int):
         img = fits.getdata(img_fn)
         mask = fits.getdata(mask_fn) if mask_fn else None
