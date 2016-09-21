@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import os
 import numpy as np
-import pipeline
+import hugs
 from sexpy import SEX_IO_DIR
 
 def run(group_id, band='I'):
@@ -23,7 +23,7 @@ def run(group_id, band='I'):
         for p in patches:
             relpath = 'group_'+str(group_id)+'/HSC-'+band+'/'+t+'/'+p
             run_label = 'HSC-'+band+'_'+t+'_'+p
-            pipeline.main(relpath, run_label, results_dir, clean='all', verbose=True)
+            hugs.pipeline.main(relpath, run_label, results_dir, clean='all', verbose=True)
 
 def doubles_mask(cat, min_sep=0.7):
     """

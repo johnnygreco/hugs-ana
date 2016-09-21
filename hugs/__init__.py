@@ -1,3 +1,4 @@
+from . import pipeline
 from . import parser
 from . import imtools
 from . import datasets

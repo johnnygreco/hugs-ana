@@ -12,7 +12,7 @@ import time
 from scipy import ndimage
 from astropy.io import fits
 
-import hugs
+from imtools import replace_with_sky
 import sexpy
 
 #########################################
@@ -97,7 +97,7 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
 
     # replace assoc regions with sky noise
     new_img_fn = sw.get_indir('img_seg_skynoise.fits')
-    hugs.imtools.replace_with_sky(
+    replace_with_sky(
         sw.get_indir('img.fits'), sw.get_outdir(step+'-SEGMENTATION.fits'),
         sw.get_outdir('bright-BACKGROUND_RMS.fits'), sw.get_outdir('bright-BACKGROUND.fits'),
         write=new_img_fn, dilator=11)
@@ -176,7 +176,8 @@ def main(relpath, run_label, results_dir='results', make_ds9reg=False,
 
 if __name__=='__main__':
     # get command-line args
-    band, tract, patch, args = hugs.parser.parse_args()
+    from parser import parse_args
+    band, tract, patch, args = parse_args()
     relpath = 'HSC-'+band+'/'+str(tract)+'/'+patch[0]+'-'+patch[-1]
     run_label = 'HSC-'+band+'_'+str(tract)+'_'+patch
     main(relpath, run_label, make_ds9reg=True, view_with_ds9=True,
