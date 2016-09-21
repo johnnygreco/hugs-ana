@@ -1,11 +1,11 @@
-
-from __future__ import print_function
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 __all__  = ['cutout']
 
 def cutout(data, coord, header=None, size=301, write=None):
     """
-    Generate a postage stamp from from a fits image.
+    Generate a postage stamp from a fits image.
 
     Parameters
     ----------
