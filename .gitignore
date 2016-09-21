@@ -8,5 +8,5 @@
 *.reg
 sexin
 sexout
-scratch
-results
+scratch/*
+results/*
