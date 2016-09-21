@@ -6,7 +6,5 @@
 *.conv
 *.param
 *.reg
-sexin
-sexout
 scratch/*
 results/*
