@@ -12,7 +12,7 @@ import time
 from scipy import ndimage
 from astropy.io import fits
 
-from imtools import replace_with_sky
+from .imtools import replace_with_sky
 import sexpy
 
 #########################################
