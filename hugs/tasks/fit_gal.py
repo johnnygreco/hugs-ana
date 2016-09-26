@@ -40,7 +40,7 @@ DEFAULT_MASK = {'thresh': 1.5,
 
 
 def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={}, 
-            prefix='fit', clean=True, img_hdu=1, **kwargs):
+            prefix='fit', clean=True, img_hdu=1, visualize=False, **kwargs):
     """
     Perform 2D galaxy fit using the hugs.imfit and hugs.photo modules, 
     which use imfit and SEP. Most of the work in this function is 
@@ -73,6 +73,8 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
         that are created in this function. 
     img_hdu : int, optional
         Index of the image if a multi-extension file is given.
+    visualize : bool, optional
+        If True, plot results.
     **kwargs : dict 
         Any parameter for hugs.photo.make_mask except img, mask, 
         and out_fn, which are set in this function. 
@@ -97,6 +99,7 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
     # become 'file.fits[hdu_index]'.  
     ######################################################################
 
+    img_fn_init = img_fn
     if (type(mask_fn)!=str) and (type(var_fn)!=str):
         header, img, mask, var = imtools.open_fits(img_fn)
         mask_fn = img_fn+'['+str(mask_fn)+']' if mask_fn else None
@@ -136,7 +139,6 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
     else:
         mask_params['mask'] = None
 
-
     ######################################################################
     # Get the coords of the galaxy of interest and set the imfit config.
     ######################################################################
@@ -167,6 +169,10 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
     out_fn = prefix+'_bestfit_params.txt'
     results = imfit.run(img_fn, config_fn, photo_mask_fn, var_fn,
                         out_fn=out_fn, config=imfit_config)
+
+    if visualize:
+        imfit.viz.img_mod_res(img_fn_init, results, 
+                              photo_mask_fn,  figsize=(18,6))
 
     if clean:
         os.remove(config_fn)

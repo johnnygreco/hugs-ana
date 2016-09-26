@@ -17,7 +17,7 @@ from toolbox.utils.plotting import ticks_off
 
 __all__ = ['imfit_results']
 
-def img_mod_res(img_fn, mod_params, cmap=plt.cm.gray_r, save_fn=None,
+def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r, save_fn=None,
                 show=True, band='i', **kwargs):
     """
     Show imfit results: image, model, and residual.
@@ -41,6 +41,13 @@ def img_mod_res(img_fn, mod_params, cmap=plt.cm.gray_r, save_fn=None,
         axes[i].imshow(data, vmin=vmin, vmax=vmax, origin='lower', 
                        cmap=cmap, aspect='equal', rasterized=True)
         axes[i].set_title(titles[i], fontsize=20, y=1.01)
+
+    if mask_fn is not None:
+        mask = fits.getdata(mask_fn)
+        mask = mask.astype(float)
+        mask[mask==0.0] = np.nan
+        axes[0].imshow(mask, origin='lower', alpha=0.4, 
+                       vmin=0, vmax=1, cmap='rainbow_r')
 
     x = 0.05
     y = 0.93
