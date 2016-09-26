@@ -1,6 +1,4 @@
-"""
-Use SEP and imfit to perform 2D galaxy fits. 
-"""
+""" Use SEP and imfit to perform 2D galaxy fits.  """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
@@ -20,10 +18,10 @@ __all__ = ['fit_gal']
 DEFAULT_PARAMS = {'X0': None , # set by gal_pos
                   'Y0': None,  # set by gal_pos
                   'PA': [18., 0, 360], 
-                  'ell': [0.2,0,1], 
-                  'n': [0.5,0,5], 
-                  'I_e': 1.0, 
-                  'r_e': 5}
+                  'ell': [0.2,0, 0.99], 
+                  'n': [1.0,0,5], 
+                  'I_e': 0.05, 
+                  'r_e': 20.0}
 
 DEFAULT_MASK = {'thresh': 1.5,
                 'backsize': 100, 
