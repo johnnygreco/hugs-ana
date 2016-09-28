@@ -28,6 +28,8 @@ for _id in group_ids:
     D_A = cosmo.D_A(z)
     r_eff = tab['FLUX_RADIUS']*hugs.pixscale*u.arcsecond.to('radian')*D_A*1e3
     tab['r_eff'] = r_eff
+    tab['z'] = z
+    tab['D_A'] = D_A
     cands = vstack([cands, tab])
 mask = hugs.doubles_mask(cands)
 cands = cands[mask]
@@ -38,15 +40,17 @@ ifiles = sorted(ifiles, key=lambda f: int(f.split('-')[0]))
 ifiles = np.array([os.path.join(dataDIR, f) for f in ifiles])
 ifiles = ifiles[mask]
 cands = cands[sorted_idx]
+cands.write('/Users/protostar/Desktop/candidates.dat', format='ascii')
 
 for i in range(len(ifiles)):
     f1, a1 = plt.subplots()
     img = fits.getdata(ifiles[sorted_idx[i]])
     img = hugs.imtools.cutout(img, (img.shape[0]/2,img.shape[1]/2), size=200).data
-    print(i+1, cands['ALPHA_J2000'][i], cands['DELTA_J2000'][i])
     vmin, vmax = zscale(img)
     a1.imshow(img, vmin=vmin, vmax=vmax, aspect='equal', origin='lower', cmap=plt.cm.gray_r)
     plt.setp(a1.get_xticklabels(), visible=False)
     plt.setp(a1.get_yticklabels(), visible=False)
     f1.savefig(saveDIR+'stamps/cand_'+str(i+1)+'.pdf', bbox='tight')
-    #print(i+1, ifiles[sorted_idx[i]])
+    print(i+1, cands['ALPHA_J2000'][i], cands['DELTA_J2000'][i], cands['z'][i], cands['D_A'][i])
+    print(i+1, ifiles[sorted_idx[i]])
+
