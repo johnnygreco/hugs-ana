@@ -18,8 +18,8 @@ __all__ = ['fit_gal']
 DEFAULT_PARAMS = {'X0': None , # set by gal_pos
                   'Y0': None,  # set by gal_pos
                   'PA': [18., 0, 360], 
-                  'ell': [0.2,0, 0.99], 
-                  'n': [1.0,0,5], 
+                  'ell': [0.2, 0, 0.99], 
+                  'n': [1.0, 0, 5], 
                   'I_e': 0.05, 
                   'r_e': 20.0}
 
