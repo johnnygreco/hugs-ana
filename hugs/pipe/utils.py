@@ -1,8 +1,7 @@
-from __future__ import divison, print_function
+from __future__ import division, print_function
 
 import numpy as np
 
-import lsst.afw.detection as afwDetect
 
 __all__ = ['get_psf_sigma', 'associate', 'image_threshold']
 
@@ -60,9 +59,6 @@ def associate(mask, fpset, radius=10, plane_name='THRESH_HIGH'):
     from skimage.draw import circle 
 
     xy0 = mask.getXY0()
-    bit_assoc = mask.getPlaneBitMask(plane_name)
-    bit_bright = mask.getPlaneBitMask('BRIGHT_OBJECT')
-    bit_vals = 2**np.arange(mask.getNumPlanesUsed())
     # False --> use footprint ids
     seg_assoc = fpset.insertIntoImage(False).getArray().copy() 
     for foot in fpset.getFootprints():
@@ -70,15 +66,16 @@ def associate(mask, fpset, radius=10, plane_name='THRESH_HIGH'):
         xc, yc = peaks.mean(axis=0)
         rows, cols = circle(yc, xc, radius, shape=mask.getArray().shape)
         circ_pix = mask.getArray()[rows, cols]
-        on_bits = [(bit_assoc in bit_vals[(b & bit_vals)!=0]) or\
-                   (bit_bright in bit_vals[(b & bit_vals)!=0]) for b in circ_pix]
+        on_bits = (circ_pix & mask.getPlaneBitMask(plane_name))!=0
+        on_bits |= (circ_pix & mask.getPlaneBitMask('BRIGHT_OBJECT'))!=0
         if np.sum(on_bits)==0:
             seg_assoc[seg_assoc==foot.getId()] = 0
     return seg_assoc
 
 
 def image_threshold(masked_image, thresh, thresh_type='stdev', npix=1, 
-                    rgrow=None, isogrow=False, plane_name='', clear_mask=True):
+                    rgrow=None, isogrow=False, plane_name='', mask=None,
+                    clear_mask=True):
     """
     Image thresholding. As bit mask will be set with name 'plane_name'.
 
@@ -99,6 +96,8 @@ def image_threshold(masked_image, thresh, thresh_type='stdev', npix=1,
         If True, use (expensive) isotropic grow. 
     plane_name : string, optional
         Name of bit plane.
+    mask : lsst.afw.image.imageLib.MaskU, optional
+        Mask to set if not same as in masked_imaged
     clear_mask : bool, optional
         If True, clear the bit plane before thresholding
 
@@ -107,18 +106,28 @@ def image_threshold(masked_image, thresh, thresh_type='stdev', npix=1,
     fp : lsst.afw.detection.detectionLib.FootprintSet
         Footprints assoicated with detected objects.
     """
-    mask = masked_image.getMask()
+    import lsst.afw.detection as afwDetect
+
+    mask = masked_image.getMask() if mask is None else mask
     thresh_type = getattr(afwDetect.Threshold, thresh_type.upper())
     thresh = afwDetect.Threshold(thresh, thresh_type)
-    fp = afwDetect.FootprintSet(masked_image, thresh, npix)
+    fp = afwDetect.FootprintSet(masked_image, thresh, '', npix)
     if rgrow is not None:
         fp = afwDetect.FootprintSet(fp, rgrow, isogrow)
     if plane_name:
+        mask.addMaskPlane(plane_name)
         if clear_mask:
             mask.clearMaskPlane(mask.getMaskPlane(plane_name))
-        mask.addMaskPlane(plane_name)
         fp.setMask(mask, plane_name)
     return fp
 
 
-def run():
+def viz(image, transparency=75, frame=1, 
+        colors=[('THRESH_HIGH', 'magenta'), ('THRESH_LOW', 'yellow')]):
+    import lsst.afw.display as afwDisplay
+    disp = afwDisplay.Display(frame)
+    for name, color in colors:
+        disp.setMaskPlaneColor(name, color) 
+    disp.setMaskTransparency(transparency)
+    disp.mtv(image)
+    return disp
