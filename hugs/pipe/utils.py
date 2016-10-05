@@ -6,6 +6,47 @@ import numpy as np
 __all__ = ['get_psf_sigma', 'associate', 'image_threshold']
 
 
+def _annulus(row_c, col_c, r_in, r_out, shape):
+    """
+    Find the indices within an annulus embedded in 
+    an array of the specified shape. 
+
+    Parameters
+    ----------
+    row_c, col_c : float
+        Ceentral coordinates of the annulus.
+    r_in : float
+        Inner radius of annulus.
+    r_out : float
+        Outer radius of annulus. 
+    shape : tuple
+        Shape of the host array.
+
+    Returns
+    -------
+    row_idx, col_idx : ndarray of int
+        Indices of annulus within host array.
+    """
+    # find bounding box of annulus
+    center = np.array([row_c, col_c])
+    ul = np.ceil(center - r_out).astype(int)
+    lr = np.ceil(center + r_out).astype(int)
+    ul = np.maximum(ul, np.array([0, 0]))
+    lr = np.minimum(lr, np.array(shape[:2]) - 1)
+    bb_shape = lr - ul + 1
+
+    # generate the coords within annulus in bbox
+    ctr_shift = center - ul
+    bb_row, bb_col = np.ogrid[0:float(bb_shape[0]), 0:float(bb_shape[1])]
+    radius = np.sqrt((bb_row-ctr_shift)**2 + (bb_col-ctr_shift[1])**2)
+    row_idx, col_idx = np.nonzero((radius >= r_in) & (radius < r_out))
+
+    # shift back to original coords
+    row_idx += ul[0]
+    col_idx += ul[1]
+    return row_idx, col_idx
+    
+
 def get_psf_sigma(exposure):
     """
     Get sigma of point-spread function.
@@ -26,12 +67,14 @@ def get_psf_sigma(exposure):
     return sigma
 
 
-def associate(mask, fpset, radius=10, plane_name='THRESH_HIGH'):
+def associate(mask, fpset, r_in=5, r_out=15, max_on_bit=20., 
+              plane_name='THRESH_HIGH'):
     """
     Associate footprints in fpset with footprints in mask plane 
     'plane_name'. A footprint is associated with an object if 
-    its center is within 'radius' pixels from an on bit in this 
-    plane.
+    an on bit falls within an annulus centered with respect to 
+    all its peaks.
+    
 
     Parameters
     ----------
@@ -39,10 +82,13 @@ def associate(mask, fpset, radius=10, plane_name='THRESH_HIGH'):
         Mask object with plane named 'plane_name'.
     fpset : lsst.afw.detection.detectionLib.FootprintSet
         Set of footprints to associate with objects in mask.
-    radius : float
-        Radius of association (in pixels) from the center of each
-        footprint in fpset.
-    plane_name : string
+    r_in : float, optional
+        Inner radius in pixels of the association annulus.
+    r_out : float, optional
+        Outer radius in pixels of the association annulus.
+    max_on_bit : int, optional
+        Maximum number of on bits to consider as associated.
+    plane_name : string, optional
         Name of the bit plane in mask to associate footprints with. 
 
     Returns
@@ -56,19 +102,17 @@ def associate(mask, fpset, radius=10, plane_name='THRESH_HIGH'):
     seg_assoc also includes footprints near objects with the 
     'BRIGHT_OBJECT' bit set.
     """
-    from skimage.draw import circle 
-
     xy0 = mask.getXY0()
     # False --> use footprint ids
     seg_assoc = fpset.insertIntoImage(False).getArray().copy() 
     for foot in fpset.getFootprints():
         peaks = np.array([p.getCentroid()-xy0 for p in foot.getPeaks()])
         xc, yc = peaks.mean(axis=0)
-        rows, cols = circle(yc, xc, radius, shape=mask.getArray().shape)
+        rows, cols = _annulus(yc, xc, r_in, r_out, shape=mask.getArray().shape)
         circ_pix = mask.getArray()[rows, cols]
         on_bits = (circ_pix & mask.getPlaneBitMask(plane_name))!=0
         on_bits |= (circ_pix & mask.getPlaneBitMask('BRIGHT_OBJECT'))!=0
-        if np.sum(on_bits)==0:
+        if np.sum(on_bits)<max_on_bit:
             seg_assoc[seg_assoc==foot.getId()] = 0
     return seg_assoc
 
