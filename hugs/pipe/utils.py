@@ -38,7 +38,7 @@ def _annulus(row_c, col_c, r_in, r_out, shape):
     # generate the coords within annulus in bbox
     ctr_shift = center - ul
     bb_row, bb_col = np.ogrid[0:float(bb_shape[0]), 0:float(bb_shape[1])]
-    radius = np.sqrt((bb_row-ctr_shift)**2 + (bb_col-ctr_shift[1])**2)
+    radius = np.sqrt((bb_row-ctr_shift[0])**2 + (bb_col-ctr_shift[1])**2)
     row_idx, col_idx = np.nonzero((radius >= r_in) & (radius < r_out))
 
     # shift back to original coords
