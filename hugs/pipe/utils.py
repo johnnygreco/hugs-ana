@@ -16,7 +16,8 @@ def _annulus(row_c, col_c, r_in, r_out, shape):
     row_c, col_c : float
         Ceentral coordinates of the annulus.
     r_in : float
-        Inner radius of annulus.
+        Inner radius of annulus. If r_in=0, the 
+        annulus becomes a circle. 
     r_out : float
         Outer radius of annulus. 
     shape : tuple
@@ -30,7 +31,7 @@ def _annulus(row_c, col_c, r_in, r_out, shape):
     # find bounding box of annulus
     center = np.array([row_c, col_c])
     ul = np.ceil(center - r_out).astype(int)
-    lr = np.ceil(center + r_out).astype(int)
+    lr = np.floor(center + r_out).astype(int)
     ul = np.maximum(ul, np.array([0, 0]))
     lr = np.minimum(lr, np.array(shape[:2]) - 1)
     bb_shape = lr - ul + 1
@@ -109,9 +110,9 @@ def associate(mask, fpset, r_in=5, r_out=15, max_on_bit=20.,
         peaks = np.array([p.getCentroid()-xy0 for p in foot.getPeaks()])
         xc, yc = peaks.mean(axis=0)
         rows, cols = _annulus(yc, xc, r_in, r_out, shape=mask.getArray().shape)
-        circ_pix = mask.getArray()[rows, cols]
-        on_bits = (circ_pix & mask.getPlaneBitMask(plane_name))!=0
-        on_bits |= (circ_pix & mask.getPlaneBitMask('BRIGHT_OBJECT'))!=0
+        ann_pix = mask.getArray()[rows, cols]
+        on_bits = (ann_pix & mask.getPlaneBitMask(plane_name))!=0
+        on_bits |= (ann_pix & mask.getPlaneBitMask('BRIGHT_OBJECT'))!=0
         if np.sum(on_bits)<max_on_bit:
             seg_assoc[seg_assoc==foot.getId()] = 0
     return seg_assoc
