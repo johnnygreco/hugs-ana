@@ -7,7 +7,6 @@ from ..utils import pixscale
 
 __all__ = ['run']
 
-
 ############################################################
 # Default parameters for thresholding and association
 ############################################################
@@ -56,7 +55,7 @@ def run(dataID, thresh={}, npix={}, assoc={}, butler=None,
 
     ############################################################
     # Get parameters and setup the mask planes. We don't need
-    # the negative detection mask
+    # the negative detection mask.
     ############################################################
 
     thresh, npix, assoc, exposure = _get_params(dataID, thresh, 
