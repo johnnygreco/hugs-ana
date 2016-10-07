@@ -18,7 +18,7 @@ ASSOC = {'r_in': 5, 'r_out': 15, 'max_on_bit': 10}
 DEFAULTS = [THRESH, NPIX, ASSOC]
 
 
-def _get_params(dataID, thresh, npix, assoc, butler):
+def _get_params(dataID, thresh, npix, assoc, butler, data_dir):
     """
     Get function parameters.
     """
@@ -28,7 +28,7 @@ def _get_params(dataID, thresh, npix, assoc, butler):
     else:
         if butler is None:
             import lsst.daf.persistence
-            butler = lsst.daf.persistence.Butler(HSC_DIR)
+            butler = lsst.daf.persistence.Butler(data_dir)
         exposure = butler.get('deepCoadd_calexp', dataID, immediate=True)
     params = [thresh, npix, assoc]
     for i in range(len(params)):
@@ -58,8 +58,8 @@ def run(dataID, thresh={}, npix={}, assoc={}, butler=None,
     # the negative detection mask.
     ############################################################
 
-    thresh, npix, assoc, exposure = _get_params(dataID, thresh, 
-                                                npix, assoc, butler)
+    thresh, npix, assoc, exposure = _get_params(dataID, thresh, npix, 
+                                                assoc, butler, data_dir)
     mi = exposure.getMaskedImage()
     mask = mi.getMask()
     mask.clearMaskPlane(mask.getMaskPlane('DETECTED'))

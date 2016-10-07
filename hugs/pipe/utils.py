@@ -43,6 +43,8 @@ def _annulus(row_c, col_c, r_in, r_out, shape):
     row_idx, col_idx = np.nonzero((radius >= r_in) & (radius < r_out))
 
     # shift back to original coords
+    row_idx.flags.writeable = True
+    col_idx.flags.writeable = True
     row_idx += ul[0]
     col_idx += ul[1]
     return row_idx, col_idx
@@ -107,7 +109,8 @@ def associate(mask, fpset, r_in=5, r_out=15, max_on_bit=20.,
     # False --> use footprint ids
     seg_assoc = fpset.insertIntoImage(False).getArray().copy() 
     for foot in fpset.getFootprints():
-        peaks = np.array([p.getCentroid()-xy0 for p in foot.getPeaks()])
+        #print(foot.getPeaks()[0], xy0, xy0[0])
+        peaks = np.array([[p.getCentroid()[0]-xy0[0], p.getCentroid()[1]-xy0[1]] for p in foot.getPeaks()])
         xc, yc = peaks.mean(axis=0)
         rows, cols = _annulus(yc, xc, r_in, r_out, shape=mask.getArray().shape)
         ann_pix = mask.getArray()[rows, cols]

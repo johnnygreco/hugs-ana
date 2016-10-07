@@ -11,7 +11,11 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import scipy.ndimage as ndimage
 
-import sep
+try:
+    import sep
+except ImportError:
+    print('Warning: You must have sep installed to use hugs.photo!')
+
 from astropy.io import fits
 
 from ..utils import bit_flag_dict

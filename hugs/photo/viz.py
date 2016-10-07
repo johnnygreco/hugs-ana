@@ -6,7 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from toolbox.image import zscale
 from toolbox.utils.plotting import ticks_off
-plt.style.use('jpg')
+try: plt.style.use('jpg')
+except: pass
 
 def overlay_mask(img, mask, cmap=plt.cm.gray_r, contrast=0.25, 
                  subplots=None, **kwargs):

@@ -7,13 +7,13 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from astropy.visualization import ZScaleInterval
 
 from ..models import Sersic
 from ..utils import pixscale
-zscale = ZScaleInterval().get_limits
-plt.style.use('jpg')
 from toolbox.utils.plotting import ticks_off
+from toolbox.image import zscale
+try: plt.style.use('jpg')
+except: pass
 
 __all__ = ['imfit_results']
 
