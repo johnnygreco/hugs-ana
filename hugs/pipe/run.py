@@ -2,7 +2,7 @@ from __future__ import division, print_function
 
 import os
 import numpy as np
-from . import utils
+from . import primitives as prim
 from ..utils import pixscale
 
 __all__ = ['run']
@@ -69,7 +69,7 @@ def run(dataID, thresh={}, npix={}, assoc={}, butler=None,
     # Smooth image at psf scale.
     ############################################################
 
-    psf_sigma = utils.get_psf_sigma(exposure)
+    psf_sigma = prim.get_psf_sigma(exposure)
     mi_smooth = lsstutils.imgproc.smooth_gauss(mi, psf_sigma)
     rgrow = int(2.4*psf_sigma + 0.5)
 
@@ -77,10 +77,10 @@ def run(dataID, thresh={}, npix={}, assoc={}, butler=None,
     # Image thesholding at low and high thresholds.
     ############################################################
 
-    fp_low = utils.image_threshold(
+    fp_low = prim.image_threshold(
         mi_smooth, thresh['low'], mask=mask,
         plane_name='THRESH_LOW', rgrow=rgrow, npix=npix['low'])
-    fp_high = utils.image_threshold(
+    fp_high = prim.image_threshold(
         mi_smooth, thresh['high'], mask=mask,
         plane_name='THRESH_HIGH', rgrow=rgrow, npix=npix['high'])
 
@@ -99,7 +99,7 @@ def run(dataID, thresh={}, npix={}, assoc={}, butler=None,
     # footprints. Then, replace these sources with noise.
     ############################################################
 
-    assoc = utils.associate(
+    assoc = prim.associate(
         mask, fp_low, r_in=assoc['r_in'], r_out=assoc['r_out'],
         max_on_bit=assoc['max_on_bit'], plane_name='THRESH_HIGH')
     exp_clone = exposure.clone()
@@ -107,7 +107,7 @@ def run(dataID, thresh={}, npix={}, assoc={}, butler=None,
     mi_clone.getImage().getArray()[assoc!=0] = noise_array[assoc!=0]
     if visualize:
         displays = []
-        displays.append(utils.viz(exp_clone, 75, 1))
+        displays.append(prim.viz(exp_clone, 75, 1))
 
     ############################################################
     # Smooth with large kernel for detection.
@@ -121,11 +121,11 @@ def run(dataID, thresh={}, npix={}, assoc={}, butler=None,
     # Image thresholding at medium threshold for detection.
     ############################################################
 
-    fp_med = utils.image_threshold(
+    fp_med = prim.image_threshold(
         mi_clone_smooth, thresh['med'], mask=mask,
         plane_name='DETECTED', npix=npix['med'])
 
     if visualize:
-       displays.append(utils.viz(exposure, 60, 2))
+       displays.append(prim.viz(exposure, 60, 2))
 
     return (displays, fp_low, fp_high, exposure) if visualize else None

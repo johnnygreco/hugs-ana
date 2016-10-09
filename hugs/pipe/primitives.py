@@ -105,12 +105,12 @@ def associate(mask, fpset, r_in=5, r_out=15, max_on_bit=20.,
     seg_assoc also includes footprints near objects with the 
     'BRIGHT_OBJECT' bit set.
     """
-    xy0 = mask.getXY0()
+    x0, y0 = mask.getXY0()
     # False --> use footprint ids
     seg_assoc = fpset.insertIntoImage(False).getArray().copy() 
     for foot in fpset.getFootprints():
-        #print(foot.getPeaks()[0], xy0, xy0[0])
-        peaks = np.array([[p.getCentroid()[0]-xy0[0], p.getCentroid()[1]-xy0[1]] for p in foot.getPeaks()])
+        peaks = np.array([[p.getCentroid()[0]-x0, 
+                           p.getCentroid()[1]-y0] for p in foot.getPeaks()])
         xc, yc = peaks.mean(axis=0)
         rows, cols = _annulus(yc, xc, r_in, r_out, shape=mask.getArray().shape)
         ann_pix = mask.getArray()[rows, cols]
