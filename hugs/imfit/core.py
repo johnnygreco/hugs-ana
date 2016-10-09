@@ -111,7 +111,7 @@ def write_config(fn, param_dict):
         print(p, val, limit, file=file)
         if p=='Y0':
             print('FUNCTION Sersic', file=file)
-    file.close
+    file.close()
 
 
 def read_results(fn, model='sersic'):
