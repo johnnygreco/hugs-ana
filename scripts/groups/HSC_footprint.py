@@ -9,6 +9,7 @@ import os
 import numpy as np
 from astropy.table import Table
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
 dataDIR = os.environ.get('DATA_DIR')
 yangDIR = os.path.join(dataDIR, 'catalogs/Yang')
 lauerDIR = os.path.join(dataDIR, 'catalogs/Lauer')
@@ -35,13 +36,18 @@ ra = np.array(ra)
 dec = np.array(dec)
 out = np.vstack([ra, dec]).T 
 print(len(ra), 'pointings')
-#np.savetxt('output/HSC_wide_pointings.dat', out)
+outfile = os.path.join(dataDIR, 'HSC/HSC-'+str(band.upper())+'_wide_pointings.dat')
+np.savetxt(outfile, out, fmt='%-13.12g')
 
 #############################
 # draw fields and pointings
 #############################
 fig, ax = plt.subplots(1,1)
-ax.scatter(ra, dec, alpha=0.1, zorder=5, color=cmap(0.0), label='HSC pointings')
+for _ra, _dec in zip(ra, dec):
+    #ax.scatter(ra, dec, alpha=0.1, zorder=5, color=cmap(0.0), label='HSC pointings')
+    diam = 1.5
+    ax.add_patch(Ellipse((_ra, _dec), diam, diam, color=cmap(0), alpha=0.1))
+
 # fall equatorial
 #ax.axhspan(ymin=-1., ymax=7, xmin=40/360., xmax=330/360., alpha=0.2, color='b', zorder=0)
 # fall equatorial
