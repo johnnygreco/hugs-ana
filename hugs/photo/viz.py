@@ -6,11 +6,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from toolbox.image import zscale
 from toolbox.utils.plotting import ticks_off
-try: plt.style.use('jpg')
-except: pass
 
 def overlay_mask(img, mask, cmap=plt.cm.gray_r, contrast=0.25, 
                  subplots=None, **kwargs):
+    try: plt.style.use('jpg')
+    except: pass
     if subplots is None:
         fig, ax = plt.subplots(**kwargs)
     else:

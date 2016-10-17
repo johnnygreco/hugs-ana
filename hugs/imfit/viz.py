@@ -12,8 +12,6 @@ from ..models import Sersic
 from ..utils import pixscale
 from toolbox.utils.plotting import ticks_off
 from toolbox.image import zscale
-try: plt.style.use('jpg')
-except: pass
 
 __all__ = ['imfit_results']
 
@@ -22,6 +20,9 @@ def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r, save_fn=No
     """
     Show imfit results: image, model, and residual.
     """
+    try: plt.style.use('jpg')
+    except: pass
+
     img = fits.getdata(img_fn)
 
     fig, axes = plt.subplots(1, 3, **kwargs)
