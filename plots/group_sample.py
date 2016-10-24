@@ -20,7 +20,7 @@ plt.rc('text', usetex=False)
 cosmo = Cosmology()
 
 datadir = '../results/'
-fn = 'cat_z0.065_Mh13.0-14.0_group_info.txt'
+fn = 'cat_z0.065_Mh12.75-14.0_group_info.txt'
 groups = Table.read(datadir+fn, format='ascii')
 coords = SkyCoord(ra=groups['ra']*u.degree, 
                   dec=groups['dec']*u.degree, 
@@ -45,7 +45,7 @@ f2.subplots_adjust(hspace=0.1, right=0.8)
 a2 = a2.flatten()
 
 ralim = [[223, 253], [123, 153], [163, 193], [203, 233], [328, 358]] 
-declim = [[40, 47], [-2, 5], [-4, 3], [-3.5, 3.5], [-2, 5]]
+declim = [[40, 47], [-1.5, 5.5], [-4, 3], [-3.5, 3.5], [-3, 4]]
 
 # norm is a class which, when called, can normalize data into the
 # [0.0, 1.0] interval.
@@ -88,7 +88,7 @@ for i in range(len(a2)):
         ra, dec = list(cone.to_radec())[0]
         ra = ra + 360*(ra<0)
         a2[i].plot(ra, dec, c=s_m.to_rgba(g['z']), lw=2.0)
-    a2[i].scatter(groups[cut]['ra'], groups[cut]['dec'], s=50,
+    a2[i].scatter(groups[cut]['ra'], groups[cut]['dec'], s=45,
                   color=s_m2.to_rgba(groups[cut]['Mh_Lest']))
     a2[i].set_xlim(ralim[i])
     a2[i].set_ylim(declim[i])
@@ -107,6 +107,7 @@ a3.scatter(groups['ra'], groups['dec'], color='k', alpha=0.7)
 f4, a4 = plt.subplots()
 a4.hist(groups['Mh_Lest'], color='k')
 a4.set_xlabel(r'$\log_{10} M_h/M_\odot$')
+f4.savefig('../figures/groups_Mh_hist.pdf', bbox_inches='tight')
 
 import RaiseWindow
 plt.show()

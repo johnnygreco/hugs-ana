@@ -19,7 +19,7 @@ cosmo = Cosmology()
 pointings = hugs.datasets.hsc.load_pointings('i')
 groups = hugs.datasets.yang.load_groups()
 
-Mh_min = 13.0
+Mh_min = 12.75
 Mh_max = 14.0
 max_z = 0.065
 max_sep = 0.75 # degrees
@@ -49,7 +49,7 @@ for g in groups_match:
     dec = np.append(dec, g['dec'])
     coord_lists.append([(r,d) for r,d in zip(ra, dec)])
 
-regions = []
+result = {}
 dir = os.environ.get('HSC_DIR')
 butler = lsst.daf.persistence.Butler(dir)
 skymap = butler.get('deepCoadd_skyMap', immediate=True)
@@ -57,7 +57,6 @@ exist_mask = np.zeros(len(groups_match), dtype=bool)
 
 for i, cl in enumerate(coord_lists):
     r, _ = lsstutils.tracts_n_patches(cl, skymap)
-    regions.append(r)
     does_exist = True
     for tract, patch in r:
         if not does_exist:
@@ -71,15 +70,13 @@ for i, cl in enumerate(coord_lists):
                 break
     if does_exist:
         exist_mask[i] = True
-
-regions = np.array(regions)
-regions = regions[exist_mask]
+        result.update({groups_match['group_id'][i]: r})
 groups_match = groups_match[exist_mask]
 
 dir = '../../results/'
 prefix = 'cat_z{}_Mh{}-{}'.format(max_z, Mh_min, Mh_max)
 fn = prefix+'_tracts_n_patches.npy'
-np.save(dir+fn, regions)
+np.save(dir+fn, result)
 
 fn = prefix+'_group_info.txt'
 groups_match.write(dir+fn, format='ascii')
