@@ -14,12 +14,10 @@ from toolbox.cosmo import Cosmology
 from toolbox.utils.plotting import line_widths
 import hugs
 cmap = plt.cm.rainbow
-#plt.style.use('ggplot')
 plt.style.use('jpg')
-plt.rc('text', usetex=False)
 cosmo = Cosmology()
 
-datadir = '../results/'
+datadir = '../../data/mycats/'
 fn = 'cat_z0.065_Mh12.75-14.0_group_info.txt'
 groups = Table.read(datadir+fn, format='ascii')
 coords = SkyCoord(ra=groups['ra']*u.degree, 
@@ -108,6 +106,11 @@ f4, a4 = plt.subplots()
 a4.hist(groups['Mh_Lest'], color='k')
 a4.set_xlabel(r'$\log_{10} M_h/M_\odot$')
 f4.savefig('../figures/groups_Mh_hist.pdf', bbox_inches='tight')
+
+f5, a5 = plt.subplots()
+a5.hist(groups['z'], color='k')
+a5.set_xlabel(r'$z$')
+f5.savefig('../figures/groups_z_hist.pdf', bbox_inches='tight')
 
 import RaiseWindow
 plt.show()
