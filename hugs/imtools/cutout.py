@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function,
 
 __all__  = ['cutout']
 
+
 def cutout(data, coord, header=None, size=301, write=None):
     """
     Generate a postage stamp from a fits image.
@@ -48,26 +49,3 @@ def cutout(data, coord, header=None, size=301, write=None):
         header = cutout.wcs.to_header() if header is not None else None
         fits.writeto(write, cutout.data, header, clobber=True)
 
-if __name__=='__main__':
-    import argparse
-    from astropy.io import fits
-    parser = argparse.ArgumentParser(description='Get cutout of fits image')
-    parser.add_argument('file', type=str, help='file name')
-    parser.add_argument('x', type=float, help='central x (ra or pixel) coordinate of cutout')
-    parser.add_argument('y', type=float, help='central y (dec or pixel) coordinate of cutout')
-    parser.add_argument('-s', '--size', help='size of cutout', default=300)
-    parser.add_argument('-w', '--write', help='save file name', default=None)
-    parser.add_argument('--no_header', help='no header for WCS', action='store_true')
-    args = parser.parse_args()
-    f = fits.open(args.file)[0]
-    header = None if args.no_header else f.header
-    coord = (args.x, args.y)
-    cutout = get_cutout(f.data, coord, header, size=args.size, write=args.write)
-    if args.write is None:
-        import matplotlib.pyplot as plt
-        from toolbox.image import zscale
-        vmin, vmax = zscale(cutout.data)
-        plt.imshow(cutout.data, vmin=vmin, vmax=vmax, cmap=plt.cm.cubehelix_r, origin='lower')
-        try: import RaiseWindow
-        except: pass
-        plt.show()
