@@ -15,8 +15,8 @@ from .. import models
 __all__ = ['fit_gal']
 
 
-DEFAULT_PARAMS = {'X0': None , # set by gal_pos
-                  'Y0': None,  # set by gal_pos
+DEFAULT_PARAMS = {'X0': None , # If None, use center +/- 30 pix
+                  'Y0': None,  # If None, use center +/- 30 pix
                   'PA': [18., 0, 360], 
                   'ell': [0.2, 0, 0.99], 
                   'n': [1.0, 0, 5], 
@@ -37,8 +37,9 @@ DEFAULT_MASK = {'thresh': 1.5,
                                        'deblend_cont': 0.001}}
 
 
-def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={}, 
-            prefix='fit', clean=True, img_hdu=1, visualize=False, **kwargs):
+def fit_gal(img_fn, mask_fn=2, var_fn=3, init_params={}, prefix='fit', 
+            clean='both', img_hdu=1, visualize=False, 
+            make_mask_kwargs={}, **kwargs):
     """
     Perform 2D galaxy fit using the hugs.imfit and hugs.photo modules, 
     which use imfit and SEP. Most of the work in this function is 
@@ -57,25 +58,21 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
         If int, the index of the hdulist in img_fn. If str, 
         the fits file name of the variance. If None, the variance
         will not be used.
-    gal_pos : array-like, optional
-        The position of the galaxy of interest in pixels. If 'center', 
-        then the center of the image will be assumed.
     init_params : dict, optional
         Initial imfit parameters that are different from defaults given 
         by DEFAULT_PARAMS.
     prefix : str, optional
         Prefix for all files generate by this function. Can include
         full path if you want files saved in a specific directory. 
-    clean : bool, optional
-        If True, delete the photometry mask and imfit config files
-        that are created in this function. 
+    clean : string, optional
+        Files to remove after fitting (mask, config, or both).
     img_hdu : int, optional
         Index of the image if a multi-extension file is given.
     visualize : bool, optional
         If True, plot results.
-    **kwargs : dict 
+    make_mask_kwargs : dict, optional
         Any parameter for hugs.photo.make_mask except img, mask, 
-        and out_fn, which are set in this function. 
+        and out_fn, which are set in this function. Can also
 
     Returns
     -------
@@ -111,11 +108,11 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
         raise Exception('Invalid file format.')
 
     ######################################################################
-    # Get the parameters for hugs.photo.make_mask from the kwargs.
+    # Get the parameters for hugs.photo.make_mask 
     ######################################################################
 
     mask_params = DEFAULT_MASK.copy()
-    for k,v in list(kwargs.items()):
+    for k,v in list(make_mask_kwargs.items()):
         if k in list(DEFAULT_MASK.keys()):
             mask_params[k] = v
         else:
@@ -141,15 +138,22 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
     # Get the coords of the galaxy of interest and set the imfit config.
     ######################################################################
 
-    if gal_pos=='center':
-        gal_pos = img.shape[1]/2, img.shape[0]/2
-    mask_params['gal_pos'] = gal_pos
-
     imfit_config = DEFAULT_PARAMS.copy()
     for k, v in list(init_params.items()):
         imfit_config[k] = v
-    imfit_config['X0'] = [gal_pos[0], gal_pos[0]-30, gal_pos[0]+30]
-    imfit_config['Y0'] = [gal_pos[1], gal_pos[1]-30, gal_pos[1]+30]
+
+    if imfit_config['X0'] is None:
+        assert imfit_config['Y0'] is None
+        gal_pos = img.shape[1]/2, img.shape[0]/2
+        mask_params['gal_pos'] = gal_pos
+        imfit_config['X0'] = [gal_pos[0], gal_pos[0]-30, gal_pos[0]+30]
+        imfit_config['Y0'] = [gal_pos[1], gal_pos[1]-30, gal_pos[1]+30]
+    else:
+        if type(imfit_config['X0'])==list:
+            gal_pos = imfit_config['X0'][0], imfit_config['Y0'][0]
+        else:
+            gal_pos = imfit_config['X0'], imfit_config['Y0']
+        mask_params['gal_pos'] = gal_pos
 
     ######################################################################
     # Make the photometry mask and save it to a fits file.
@@ -169,12 +173,13 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, gal_pos='center', init_params={},
                         out_fn=out_fn, config=imfit_config)
 
     if visualize:
-        imfit.viz.img_mod_res(img_fn_init, results, 
-                              photo_mask_fn,  figsize=(18,6))
+        imfit.viz.img_mod_res(img_fn_init, results, photo_mask_fn, 
+                              figsize=(16,6), **kwargs)
 
-    if clean:
-        os.remove(config_fn)
+    if (clean=='mask') or (clean=='both'):
         os.remove(photo_mask_fn)
+    if (clean=='config') or (clean=='both'):
+        os.remove(config_fn)
 
     sersic = models.Sersic(results)
 
