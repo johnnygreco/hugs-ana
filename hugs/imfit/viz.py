@@ -15,8 +15,8 @@ from toolbox.image import zscale
 
 __all__ = ['imfit_results']
 
-def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r, save_fn=None,
-                show=True, band='i', **kwargs):
+def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r, 
+                save_fn=None, show=True, band='i', **kwargs):
     """
     Show imfit results: image, model, and residual.
     """
@@ -26,7 +26,7 @@ def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r, save_fn=No
     img = fits.getdata(img_fn)
 
     fig, axes = plt.subplots(1, 3, **kwargs)
-    fig.subplots_adjust(wspace=0.05)
+    fig.subplots_adjust(wspace=0.08)
 
     s = Sersic(mod_params)
     model = s.array(img.shape)
@@ -63,12 +63,19 @@ def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r, save_fn=No
     chisq = r'$\chi^2_\mathrm{dof} = '+\
             str(round(mod_params['reduced_chisq'],2))+'$' 
     c = 'b'
-    axes[1].text(x, y, m_tot, transform=axes[1].transAxes, fontsize=fs, color=c)
-    axes[1].text(x, y-dy, mu_0, transform=axes[1].transAxes, fontsize=fs, color=c)
-    axes[1].text(x, y-2*dy, mu_e, transform=axes[1].transAxes, fontsize=fs, color=c)
-    axes[1].text(x+dx, y, n, transform=axes[1].transAxes, fontsize=fs, color=c)
-    axes[1].text(x+dx, y-dy, r_e, transform=axes[1].transAxes, fontsize=fs, color=c)
-    axes[1].text(x+dx, y-2*dy, chisq, transform=axes[1].transAxes, fontsize=fs, color=c)
+
+    axes[1].text(x, y, m_tot, transform=axes[1].transAxes, 
+                 fontsize=fs, color=c)
+    axes[1].text(x, y-dy, mu_0, transform=axes[1].transAxes, 
+                 fontsize=fs, color=c)
+    axes[1].text(x, y-2*dy, mu_e, transform=axes[1].transAxes, 
+                 fontsize=fs, color=c)
+    axes[1].text(x+dx, y, n, transform=axes[1].transAxes, 
+                 fontsize=fs, color=c)
+    axes[1].text(x+dx, y-dy, r_e, transform=axes[1].transAxes, 
+                 fontsize=fs, color=c)
+    axes[1].text(x+dx, y-2*dy, chisq, transform=axes[1].transAxes, 
+                 fontsize=fs, color=c)
 
     if show:
         try: import RaiseWindow

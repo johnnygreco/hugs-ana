@@ -1,108 +1,41 @@
-"""
-Collection of useful variables and functions for HSC-HUGs.
-"""
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import os
 import numpy as np
 
-__all__ = ['pixscale', 'apply_cuts', 'bit_dict', 'bit_flag_dict', 
-           'get_bitmask_flags', 'doubles_mask']
+__all__ = ['hugs_pipe_io', 'pixscale', 'bit_dict', 'bit_flag_dict', 
+	   'get_arg_parser', 'doubles_mask', 'mkdir_if_needed', 'grouper']
+           
 
+hugs_pipe_io = os.environ.get('HUGS_PIPE_IO')
 pixscale = 0.168 # arcsec/pixel
 
-def apply_cuts(cat, z=0.05, min_reff=1.5, min_iso0=400, max_flags=3, sb_lo=23.99):
-    """
-    Apply selection cuts to input catalog. 
-
-    Parameters
-    ----------
-    cat : astropy.table.Table
-        Catalog of objects detected by SExtractor. 
-    z : float, optional
-        Galaxy group redshift
-    min_reff : float, optional
-        Cut at and below this effective radius in kpc.
-    min_iso0 : int, optional
-        Cut at and below this isophotal area (pixel^2).
-    max_flags : int, optional
-        Cut at and above this many flags 
-    sb_lo : float, optional
-        Cut when central SB is lower (i.e., brighter) than
-        this value in mag/arcsec
-
-    Returns
-    cat : astropy.table.Table
-        The catalog with the selection cuts applied.
-    """
-    import astropy.units as u
-    from toolbox.cosmo import Cosmology
-    
-    cosmo = Cosmology()
-    kpc_per_pix = u.arcsec.to('radian')*pixscale*cosmo.D_A(z)*1e3
-    min_flux_radius = (min_reff/kpc_per_pix) # pixels
-
-    min_cuts = {'ISO0': min_iso0, 
-                'FLUX_RADIUS': min_flux_radius,
-                'MU_APER_2': sb_lo}
-    max_cuts = {'FLAGS' : max_flags}
-    cuts = {'min' : min_cuts, 'max' : max_cuts}
-    
-    print(len(cat), 'objects in cat before cuts')
-
-    min_mask = np.ones(len(cat), dtype=bool)
-    for key, min_val in cuts['min'].items():
-        if min_val is not None:
-            print('cutting', key, 'at', min_val)
-            min_mask[cat[key] <= min_val] = False
-    max_mask = np.ones(len(cat), dtype=bool)
-    for key, max_val in cuts['max'].items():
-        if max_val is not None:
-            print('cutting', key, 'at', max_val)
-            max_mask[cat[key] >= max_val] = False
-    mask = min_mask & max_mask
-    cat = cat[mask]
-    print(len(cat), 'objects in cat after cuts')
-    return cat
-
-
-bit_dict =  {1: 'BAD',                # Pixel is physically bad (a known camera defect)
-             2: 'SATURATED',          # Pixel flux exceeded full-well
-             4: 'INTERPOLATED',       # Pixel contains a value based on interpolation from neighbours.
-             8: 'CR',                 # Cosmic Ray hit
-             16: 'EDGE',              # Near the CCD edge
-             32: 'DETECTED',          # Pixel is part of a source footprint (a detected source)
-             64: 'DETECTED_NEGATIVE', # Pixel is part of a negative source footprint (in difference image)
-             128: 'SUSPECT',          # Pixel is nearly saturated. It may not be well corrected for non-linearity.
-             256: 'NO_DATA',          # (Coadd only) Pixel has no input data (between CCDs, beyond edge of frame)
-             512: 'BRIGHT_OBJECT',    # 
-             1024: 'CLIPPED',         # (Coadd only) Co-addition process clipped 1 or 2 (but not more) input pixels
-             2048: 'CROSSTALK',       # Pixel location affected by crosstalk (and corrected)
-             4096: 'NOT_DEBLENDED',   # 
-             8192: 'UNMASKEDNAN'}     # A NaN occurred in this pixel in ISR (instrument signature removal - bias,flat,etc)
+bit_dict =  {1: 'BAD',                
+             2: 'SATURATED',          
+             4: 'INTERPOLATED',       
+             8: 'CR',                 
+             16: 'EDGE',              
+             32: 'DETECTED',          
+             64: 'DETECTED_NEGATIVE', 
+             128: 'SUSPECT',          
+             256: 'NO_DATA',          
+             512: 'BRIGHT_OBJECT',    
+             1024: 'CLIPPED',         
+             2048: 'CROSSTALK',       
+             4096: 'NOT_DEBLENDED',   
+             8192: 'UNMASKEDNAN'}     
 
 bit_flag_dict = dict((v,k) for k,v in bit_dict.items())
 
 
-def get_bitmask_flags(decimal_sum):
-    """
-    Return the flags associated with the decimal sum 
-    from the HSC bitmask
-
-    Parameters
-    ----------
-    decimal_sum : int
-        Decimal sum of powers of 2. 
-    
-    Returns
-    -------
-    flags : list of strings 
-        All flag names implied by the input sum. 
-    """
-    decimal_mask_vals = 2**np.arange(len(bit_dict))
-    on_bits = decimal_mask_vals[(decimal_sum & decimal_mask_vals)!=0]
-    flags = [bit_dict[b] for b in on_bits]
-    return flags 
+def get_arg_parser(description='hugs parser'):
+    from argparse import ArgumentParser
+    parser = ArgumentParser(description)
+    parser.add_argument('tract', type=int, help='HSC tract')
+    parser.add_argument('patch', type=str, help='HSC patch')
+    parser.add_argument('-b', '--band', help='HSC band', default='I')
+    return parser
 
 
 def doubles_mask(cat, min_sep=0.7):
@@ -120,3 +53,20 @@ def doubles_mask(cat, min_sep=0.7):
             unique[i] = True # it will certainly match itself
             mask &= unique   # double entries set to False
     return mask
+
+
+def mkdir_if_needed(directory):
+    """"
+    Create directory if it does not exist.
+    """
+    if not os.path.isdir(directory):
+        os.mkdir(directory)
+
+
+def grouper(iterable, n, fillvalue=None):
+    """
+    Group iterable into n groups.
+    """
+    from six.moves import zip_longest
+    grouped_iterable = zip_longest(*[iter(iterable)]*n, fillvalue=fillvalue)
+    return list(grouped_iterable)
