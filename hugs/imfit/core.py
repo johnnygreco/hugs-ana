@@ -143,5 +143,8 @@ def read_results(fn, model='sersic'):
     results = {'reduced_chisq': float(reduced_chisq)}
     if model=='sersic':
         for i in range(7):
-            results.update({SERSIC_PARAMS[i]: float(params[i].split()[1])})
+            results.update({SERSIC_PARAMS[i]: 
+                            float(params[i].split()[1])})
+            results.update({SERSIC_PARAMS[i]+'_err':
+                            float(params[i].split()[4])})
     return results
