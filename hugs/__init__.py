@@ -5,4 +5,5 @@ from . import imfit
 from . import models
 from . import tasks
 from . import selection
+from .struct import Struct
 from .utils import *
