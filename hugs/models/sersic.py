@@ -56,6 +56,9 @@ class Sersic(object):
         self.m_tot = self.mu_e_ave - 2.5*np.log10(2*A_eff)
         if 'reduced_chisq' in list(params.keys()):
             self.reduced_chisq = params['reduced_chisq']
+        for k, v in params.items():
+            if 'err' in k:
+                setattr(self, k, v)
 
     def array(self, shape, logscale=False):
         """
