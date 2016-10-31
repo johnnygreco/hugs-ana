@@ -7,7 +7,7 @@ import numpy as np
 from astropy.table import Table
 import hugs
 
-bands = 'GI'
+bands = 'GRI'
 run_label = 'testrun'
 
 stampdir = os.path.join(hugs.utils.hugs_pipe_io, 'stamps')
@@ -36,6 +36,7 @@ for candy_files in stamp_files:
     candy_nums = np.array([int(f.split('-')[1]) for f in candy_files])
     assert np.alltrue(candy_nums==candy_nums[0])
     num = candy_nums[0]
+    print(cat['mag_ell', 'mu_3', 'mu_6', 'mu_9', 'r_circ', 'a_3_sig'][num])
 
     # fit i-band data first
     fn_iband = [f for f in candy_files if f.split('-')[2]=='i'][0]
