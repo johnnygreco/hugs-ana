@@ -34,8 +34,9 @@ def get_candy_stamps(cat, label=None, bands='GRI', outdir=STAMPDIR):
     if label is None:
         import time
         label = time.strftime("%Y%m%d-%H%M%S")
-
-    rundir = os.path.join(outdir, 'candies_'+label)
+        rundir = os.path.join(outdir, 'stamps_'+label)
+    else:
+        rundir = os.path.join(outdir, label)
     utils.mkdir_if_needed(rundir)
 
     new_cat_fn = os.path.join(rundir, 'candy.cat')
@@ -85,14 +86,13 @@ def fit_candy_stamps(label, cat=None, bands='GRI', save_figs=True):
     index is held fixed. 
     """
 
-    rundir = os.path.join(STAMPDIR, 'candies_'+label)
+    rundir = os.path.join(STAMPDIR, label)
 
     # if directory does not exist, get the stamps 
     if not os.path.isdir(rundir):
         assert cat is not None
         get_candy_stamps(cat, label=label, bands=bands)
     else:
-        assert cat is None
         cat_fn = os.path.join(rundir, 'candy.cat')
         cat = Table.read(cat_fn, format='ascii')
 
@@ -104,7 +104,7 @@ def fit_candy_stamps(label, cat=None, bands='GRI', save_figs=True):
 
     # all imfit results will be saved in imfit directory
     imfitdir = os.path.join(rundir, 'imfit')
-    utils.mkdir_if_needed(rundir)
+    utils.mkdir_if_needed(imfitdir)
 
     # loop over candidates 
     candy_params = Table()
@@ -123,6 +123,7 @@ def fit_candy_stamps(label, cat=None, bands='GRI', save_figs=True):
         ell = cat['ellipticity'][num]
         init_params = {'PA': [pa, 0, 180],
                        'ell': [ell, 0, 0.999]}
+        ra, dec = cat['ra', 'dec'][num]
         
         # fit all bands separately
         r_e_err = []
@@ -147,10 +148,12 @@ def fit_candy_stamps(label, cat=None, bands='GRI', save_figs=True):
 
         # generate ouput columns for best band
         best = fits[best_idx]
-        data = [num, best_band, best.n, best.m_tot, best.mu_0, 
+        data = [num, best_band, ra, dec, best.n, best.m_tot, best.mu_0, 
                 best.ell, best.r_e*utils.pixscale, best.PA]
         names = ['candy_num', 
                  'best_band',
+                 'ra',
+                 'dec',
                  'n', 
                  'm_tot('+best_band+')', 
                  'mu_0('+best_band+')',
