@@ -38,8 +38,8 @@ DEFAULT_MASK = {'thresh': 1.5,
 
 
 def fit_gal(img_fn, mask_fn=2, var_fn=3, init_params={}, prefix='fit', 
-            clean='both', img_hdu=1, visualize=False, 
-            make_mask_kwargs={}, **kwargs):
+            clean='both', img_hdu=1, visualize=False, photo_mask_fn=None,
+            make_mask_kwargs={}, delta_pos=50.0, **kwargs):
     """
     Perform 2D galaxy fit using the hugs.imfit and hugs.photo modules, 
     which use imfit and SEP. Most of the work in this function is 
@@ -70,9 +70,15 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, init_params={}, prefix='fit',
         Index of the image if a multi-extension file is given.
     visualize : bool, optional
         If True, plot results.
+    photo_mask_fn : string
+        File name of photometry mask. If None, it will be created
+        using sep. 
     make_mask_kwargs : dict, optional
         Any parameter for hugs.photo.make_mask except img, mask, 
         and out_fn, which are set in this function. Can also
+    delta_pos : float, optional
+        Uncertainty in position in pixels. Only used if X0=Y0=None, 
+        in which case the center of the image is assumed. 
 
     Returns
     -------
@@ -82,8 +88,6 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, init_params={}, prefix='fit',
         
     Notes
     -----
-    - If you want to use the variance map when making the photometry
-      mask, pass sig=True as a kwargs. By default, this is set to False.
     - If using a multi-extension fits file, then the image, mask and 
       variance must be in the same fits file. 
     """
@@ -146,8 +150,10 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, init_params={}, prefix='fit',
         assert imfit_config['Y0'] is None
         gal_pos = img.shape[1]/2, img.shape[0]/2
         mask_params['gal_pos'] = gal_pos
-        imfit_config['X0'] = [gal_pos[0], gal_pos[0]-30, gal_pos[0]+30]
-        imfit_config['Y0'] = [gal_pos[1], gal_pos[1]-30, gal_pos[1]+30]
+        imfit_config['X0'] = [gal_pos[0], gal_pos[0]-delta_pos,
+                              gal_pos[0]+delta_pos]
+        imfit_config['Y0'] = [gal_pos[1], gal_pos[1]-delta_pos,
+                              gal_pos[1]+delta_pos]
     else:
         if type(imfit_config['X0'])==list:
             gal_pos = imfit_config['X0'][0], imfit_config['Y0'][0]
@@ -159,9 +165,10 @@ def fit_gal(img_fn, mask_fn=2, var_fn=3, init_params={}, prefix='fit',
     # Make the photometry mask and save it to a fits file.
     ######################################################################
 
-    photo_mask_fn = prefix+'_photo_mask.fits'
-    photo_mask = photo.make_mask(img, out_fn=photo_mask_fn, 
-                                 **mask_params)
+    if photo_mask_fn is None:
+        photo_mask_fn = prefix+'_photo_mask.fits'
+        photo_mask = photo.make_mask(img, out_fn=photo_mask_fn, 
+                                     **mask_params)
 
     ######################################################################
     # Run imfit. The best-fit params will be saved to out_fn. 

@@ -35,8 +35,7 @@ class Sersic(object):
         """
         Initialize and calculate a bunch of useful quantities.
         """
-        self.params = {k:v for k,v in params.items() if k in SERSIC_PARAMS}
-        self.param_names = list(self.params.keys())
+        self.params = params
         self.I_e = params['I_e']
         self.r_e = params['r_e']
         self.n = params['n']

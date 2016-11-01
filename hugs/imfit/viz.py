@@ -16,7 +16,8 @@ from toolbox.image import zscale
 __all__ = ['imfit_results']
 
 def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r, 
-                save_fn=None, show=True, band='i', **kwargs):
+                save_fn=None, show=True, band='i', subplots=None, 
+                titles=True, **kwargs):
     """
     Show imfit results: image, model, and residual.
     """
@@ -25,8 +26,11 @@ def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r,
 
     img = fits.getdata(img_fn)
 
-    fig, axes = plt.subplots(1, 3, **kwargs)
-    fig.subplots_adjust(wspace=0.08)
+    if subplots is None:
+        fig, axes = plt.subplots(1, 3, **kwargs)
+        fig.subplots_adjust(wspace=0.08)
+    else:
+        fig, axes = subplots
 
     s = Sersic(mod_params)
     model = s.array(img.shape)
@@ -35,7 +39,12 @@ def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r,
     vmin, vmax = zscale(img)
 
     param_labels = {}
-    titles = ['Original Image', 'Model', 'Residual']
+
+    if titles:
+        titles = ['Original Image', 'Model', 'Residual']
+    else:
+        titles = ['']*3
+
 
     for i, data in enumerate([img, model, res]):
         ticks_off(axes[i])
