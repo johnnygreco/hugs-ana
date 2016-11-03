@@ -4,11 +4,11 @@ from __future__ import (absolute_import, division, print_function,
 import os
 import numpy as np
 
-__all__ = ['hugs_pipe_io', 'pixscale', 'bit_dict', 'bit_flag_dict', 
+__all__ = ['io', 'pixscale', 'bit_dict', 'bit_flag_dict', 
 	   'get_arg_parser', 'doubles_mask', 'mkdir_if_needed', 'grouper']
            
 
-hugs_pipe_io = os.environ.get('HUGS_PIPE_IO')
+io = os.environ.get('HUGS_PIPE_IO')
 pixscale = 0.168 # arcsec/pixel
 
 bit_dict =  {1: 'BAD',                
