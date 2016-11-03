@@ -37,7 +37,8 @@ def _ring(r_inner, r_outer, dtype=np.int, invert=False):
     fp = r.astype(dtype)
     return fp
 
-def rmedian(infile, outfile, r_inner, r_outer, **kwargs):
+
+def rmedian(data, r_inner, r_outer, **kwargs):
     """
     Median filter image with a ring footprint. This
     function produces results similar to the IRAF 
@@ -45,21 +46,15 @@ def rmedian(infile, outfile, r_inner, r_outer, **kwargs):
 
     Parameters
     ----------
-    infile : string
-        The input fits file. 
-    outfile : string
-        The output fits file.
+    data : ndarray
+        Input image array 
     r_inner : int
         The inner radius of the ring in pixels.
     r_outer : int
         The outer radius of the ring in pixels.
     """
-    from astropy.io import fits
     from scipy.ndimage import median_filter
 
-    infits = fits.open(infile)[0]
     fp = _ring(r_inner, r_outer, **kwargs)
-    print('applying ring filer to', infile)
-    filtered = median_filter(infits.data, footprint=fp)
-    print('writing', outfile)
-    fits.writeto(outfile, filtered, infits.header, clobber=True)
+    filtered_data = median_filter(data, footprint=fp)
+    return filtered_data
