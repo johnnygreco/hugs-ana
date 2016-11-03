@@ -10,7 +10,7 @@ from .fit_gal import fit_gal
 from .. import utils
 from ..datasets import hsc
 from .. import imfit
-STAMPDIR = os.path.join(utils.hugs_pipe_io, 'stamps')
+STAMPDIR = os.path.join(utils.io, 'stamps')
 
 __all__ = ['get_candy_stamps', 'fit_candy_stamps']
 
