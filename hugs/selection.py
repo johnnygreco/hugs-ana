@@ -9,16 +9,16 @@ import numpy as np
 from astropy.table import Table
 from . import utils
 
-__all__ = ['cutter', 'MIN_CUTS', 'MAX_CUTS']
+__all__ = ['MIN_CUTS', 'MAX_CUTS', 'cutter', 'doubles_mask']
 
 ##################################
 # Default selection cuts
 ##################################
 
 MIN_CUTS = {'a_3_sig': 2.0,
-            'r_circ': 1.5,
-            'mu_3': 23.0}
-MAX_CUTS = {'mag_ell': 24.0}
+            'r_circ_ell': 1.5,
+            'mu_3_i': 23.0}
+MAX_CUTS = {'num_edge_pix': 1}
 
 
 def _max_r_vir_cut(cat, group_id, max_r_vir):
@@ -100,3 +100,41 @@ def cutter(cat, min_cuts=MIN_CUTS, max_cuts=MAX_CUTS, verbose=True,
         print(mask.sum(), 'objects in cat after cuts')
 
     return (cat[mask], mask) if return_mask else cat[mask]
+
+
+def doubles_mask(cat, min_sep=0.7, ra_col='ra', dec_col='dec'):
+    """
+    Build mask for double entries in a catalog. 
+    Consider object within min_sep arcsec the same object
+
+    Parameters
+    ----------
+    cat : astropy.table.Table
+        Input catalog.
+    min_sep : float, optional
+        Minimum separation (arcsec) to be consisdered separate objects.
+    ra_col : string, optional
+        RA column name.
+    dec_col : string, optional
+        Declination column name.
+
+    Returns
+    -------
+    mask : ndarray
+        Mask that when applied to cat will remove double entries. 
+
+    Notes
+    -----
+    RA and dec must be in degrees. 
+    """
+    mask = np.ones(len(cat), dtype=bool)
+    for i, (x, y) in enumerate(cat[ra_col, dec_col]):
+        # don't search objects flagged as double entries
+        if mask[i]==True:
+            # very small angles, so euclid is okay
+            dist_sq = np.sqrt((x - cat[ra_col])**2 + (y - cat[dec_col])**2)
+            dist_sq *= 3600.0
+            unique = dist_sq > min_sep
+            unique[i] = True # it will certainly match itself
+            mask &= unique   # double entries set to False
+    return mask

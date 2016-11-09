@@ -5,7 +5,7 @@ import os
 import numpy as np
 
 __all__ = ['io', 'pixscale', 'bit_dict', 'bit_flag_dict', 
-	   'get_arg_parser', 'doubles_mask', 'mkdir_if_needed', 'grouper']
+	   'get_arg_parser', 'mkdir_if_needed', 'grouper']
            
 
 io = os.environ.get('HUGS_PIPE_IO')
@@ -36,23 +36,6 @@ def get_arg_parser(description='hugs parser'):
     parser.add_argument('patch', type=str, help='HSC patch')
     parser.add_argument('-b', '--band', help='HSC band', default='I')
     return parser
-
-
-def doubles_mask(cat, min_sep=0.7):
-    """
-    Build mask for double entries in a catalog. 
-    Consider object within min_sep arcsec the same object
-    """
-    from toolbox.astro import angsep
-    mask = np.ones(len(cat), dtype=bool)
-    for i, (ra, dec) in enumerate(cat['ALPHA_J2000','DELTA_J2000']):
-        # don't search objects flagged as double entries
-        if mask[i]==True:
-            seps = angsep(ra, dec, cat['ALPHA_J2000'], cat['DELTA_J2000'])
-            unique = seps > min_sep
-            unique[i] = True # it will certainly match itself
-            mask &= unique   # double entries set to False
-    return mask
 
 
 def mkdir_if_needed(directory):
