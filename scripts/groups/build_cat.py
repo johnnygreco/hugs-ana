@@ -19,9 +19,9 @@ cosmo = Cosmology()
 pointings = hugs.datasets.hsc.load_pointings('i')
 groups = hugs.datasets.yang.load_groups()
 
-Mh_min = 12.75
+Mh_min = 12.5
 Mh_max = 14.0
-max_z = 0.065
+max_z = 0.02
 max_sep = 0.75 # degrees
 num_r_vir = 2.0
 

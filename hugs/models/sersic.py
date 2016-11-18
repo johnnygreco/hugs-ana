@@ -59,6 +59,19 @@ class Sersic(object):
             if 'err' in k:
                 setattr(self, k, v)
 
+    def __call__(self, x, y):
+        """
+        Evaluate Sersic.
+        """
+        a, b = self.r_e, (1 - self.ell) * self.r_e
+        theta = self.theta*np.pi/180.0
+        cos_theta, sin_theta = np.cos(theta), np.sin(theta)
+        x_maj = (x - self.X0) * cos_theta + (y - self.Y0) * sin_theta
+        x_min = -(x - self.X0) * sin_theta + (y - self.Y0) * cos_theta
+        z = np.sqrt((x_maj/a) ** 2 + (x_min/b) ** 2)
+        img = self.I_e* np.exp(-self.b_n * (z ** (1/self.n) - 1))
+        return img
+
     def array(self, shape, logscale=False):
         """
         Get 2D array of Sersic model.
@@ -75,12 +88,6 @@ class Sersic(object):
         img : 2D ndarray
             Model array with input shape.
         """
-        x, y = np.meshgrid(np.arange(shape[1]), np.arange(shape[0]))
-        a, b = self.r_e, (1 - self.ell) * self.r_e
-        theta = self.theta*np.pi/180.0
-        cos_theta, sin_theta = np.cos(theta), np.sin(theta)
-        x_maj = (x - self.X0) * cos_theta + (y - self.Y0) * sin_theta
-        x_min = -(x - self.X0) * sin_theta + (y - self.Y0) * cos_theta
-        z = np.sqrt((x_maj/a) ** 2 + (x_min/b) ** 2)
-        img = self.I_e* np.exp(-self.b_n * (z ** (1/self.n) - 1))
+        y, x = np.indices(shape)
+        img = self.__call__(x, y)
         return np.log10(img) if logscale else img
