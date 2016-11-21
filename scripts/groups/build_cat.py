@@ -19,11 +19,12 @@ cosmo = Cosmology()
 pointings = hugs.datasets.hsc.load_pointings('i')
 groups = hugs.datasets.yang.load_groups()
 
-Mh_min = 12.5
+Mh_min = 12.75
 Mh_max = 14.0
-max_z = 0.02
+max_z = 0.065
 max_sep = 0.75 # degrees
 num_r_vir = 2.0
+bands = 'GRI'
 
 cut = (groups['Mh_Lest'] >= Mh_min) & (groups['Mh_Lest'] <= Mh_max)
 cut &= groups['z'] <= max_z
@@ -61,7 +62,7 @@ for i, cl in enumerate(coord_lists):
     for tract, patch in r:
         if not does_exist:
             break
-        for band in ['G', 'R', 'I']:
+        for band in bands:
             dataId = {'tract': tract, 'patch': patch, 'filter': 'HSC-'+band}
             fn = butler.get(
                 'deepCoadd_calexp_filename', dataId, immediate=True)
