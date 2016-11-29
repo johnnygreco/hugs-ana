@@ -6,6 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import os
 import numpy as np
+import pandas as pd
 from astropy.table import Table
 from . import utils
 
@@ -109,7 +110,7 @@ def doubles_mask(cat, min_sep=0.7, ra_col='ra', dec_col='dec'):
 
     Parameters
     ----------
-    cat : astropy.table.Table
+    cat : astropy.table.Table or pandas DataFrame
         Input catalog.
     min_sep : float, optional
         Minimum separation (arcsec) to be consisdered separate objects.
@@ -128,11 +129,18 @@ def doubles_mask(cat, min_sep=0.7, ra_col='ra', dec_col='dec'):
     RA and dec must be in degrees. 
     """
     mask = np.ones(len(cat), dtype=bool)
-    for i, (x, y) in enumerate(cat[ra_col, dec_col]):
+
+    if type(cat)==Table:
+        cat = cat.to_pandas()
+    else:
+        assert type(cat)==pd.core.frame.DataFrame
+
+    for i, (_, series) in enumerate(cat.iterrows()):
         # don't search objects flagged as double entries
+        x, y = series[[ra_col, dec_col]]
         if mask[i]==True:
             # very small angles, so euclid is okay
-            dist_sq = np.sqrt((x - cat[ra_col])**2 + (y - cat[dec_col])**2)
+            dist_sq = np.sqrt((x - cat[ra_col].values)**2 + (y - cat[dec_col].values)**2)
             dist_sq *= 3600.0
             unique = dist_sq > min_sep
             unique[i] = True # it will certainly match itself
