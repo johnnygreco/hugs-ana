@@ -126,7 +126,9 @@ def doubles_mask(cat, min_sep=0.7, ra_col='ra', dec_col='dec'):
 
     Notes
     -----
-    RA and dec must be in degrees. 
+    - This is a brute-force, super-slow function. 
+      Use hugs_pipe.cattools.remove_duplicates instead. 
+    - RA and dec must be in degrees. 
     """
     mask = np.ones(len(cat), dtype=bool)
 
@@ -140,8 +142,9 @@ def doubles_mask(cat, min_sep=0.7, ra_col='ra', dec_col='dec'):
         x, y = series[[ra_col, dec_col]]
         if mask[i]==True:
             # very small angles, so euclid is okay
-            dist_sq = np.sqrt((x - cat[ra_col].values)**2 + (y - cat[dec_col].values)**2)
-            dist_sq *= 3600.0
+            dist = np.sqrt((x - cat[ra_col].values)**2 +\
+                           (y - cat[dec_col].values)**2)
+            dist *= 3600.0
             unique = dist_sq > min_sep
             unique[i] = True # it will certainly match itself
             mask &= unique   # double entries set to False
