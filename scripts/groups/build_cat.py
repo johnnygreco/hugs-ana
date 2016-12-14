@@ -20,7 +20,7 @@ pointings = hugs.datasets.hsc.load_pointings('i')
 groups = hugs.datasets.yang.load_groups()
 
 Mh_min = 12.75
-Mh_max = 14.0
+Mh_max = 15.0
 max_z = 0.065
 max_sep = 0.75 # degrees
 num_r_vir = 2.0
