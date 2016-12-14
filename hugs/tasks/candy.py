@@ -10,12 +10,11 @@ from .fit_gal import fit_gal
 from .. import utils
 from ..datasets import hsc
 from .. import imfit
-STAMPDIR = os.path.join(utils.io, 'stamps')
 
 __all__ = ['get_candy_stamps', 'fit_candy_stamps']
 
 
-def get_candy_stamps(cat, label=None, bands='GRI', outdir=STAMPDIR):
+def get_candy_stamps(cat, label=None, bands='GRI', outdir=None):
     """
     Get postage stamps from database. 
 
@@ -38,6 +37,9 @@ def get_candy_stamps(cat, label=None, bands='GRI', outdir=STAMPDIR):
     else:
         rundir = os.path.join(outdir, label)
     utils.mkdir_if_needed(rundir)
+
+    if outdir is None:
+        outdir = os.path.join(utils.io, 'stamps')
 
     new_cat_fn = os.path.join(rundir, 'candy.cat')
     cat.write(new_cat_fn, format='ascii')
@@ -86,7 +88,7 @@ def fit_candy_stamps(label, cat=None, bands='GRI', save_figs=True):
     index is held fixed. 
     """
 
-    rundir = os.path.join(STAMPDIR, label)
+    rundir = os.path.join(os.path.join(utils.io, 'stamps'), label)
 
     # if directory does not exist, get the stamps 
     if not os.path.isdir(rundir):
