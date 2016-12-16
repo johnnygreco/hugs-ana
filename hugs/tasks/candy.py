@@ -41,8 +41,8 @@ def get_candy_stamps(cat, label=None, bands='GRI', outdir=None):
     if outdir is None:
         outdir = os.path.join(utils.io, 'stamps')
 
-    new_cat_fn = os.path.join(rundir, 'candy.cat')
-    cat.write(new_cat_fn, format='ascii')
+    new_cat_fn = os.path.join(rundir, 'candy.csv')
+    cat.write(new_cat_fn)
 
     coordlist_fn = os.path.join(rundir, 'coordlist.txt')
     hsc.make_query_coordlist(cat, coordlist_fn, bands)
