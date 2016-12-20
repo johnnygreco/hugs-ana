@@ -30,7 +30,7 @@ def load_pointings(band='i'):
 
 
 def make_query_coordlist(cat, fn='coordlist.txt', bands='GRI', 
-                         size=30, rerun='s16a_wide'):
+                         size=30, rerun='s16a_wide', **kwargs):
     """
     Generate coord lists for DAS query.
 
@@ -61,7 +61,8 @@ def make_query_coordlist(cat, fn='coordlist.txt', bands='GRI',
     file.close()
 
 
-def cutout_query(coordlist, username='grecoj', outdir=None):
+def cutout_query(coordlist, username='grecoj', outdir=None, 
+                 password=None, **kwargs):
     """
     Query data base for postage-stamp images.
 
@@ -84,15 +85,26 @@ def cutout_query(coordlist, username='grecoj', outdir=None):
 
     utils.mkdir_if_needed(outdir)
     url = 'https://hscdata.mtk.nao.ac.jp:4443/das_quarry/cgi-bin/quarryImage'
-    cmd = 'curl {} --form list=@{} --user {} --insecure | tar xvf - -C '+outdir
-    cmd = cmd.format(url, coordlist, username)
 
-    print('executing:', cmd)
+    if password:
+        cmd = 'curl {} --form list=@{} --user {}:{}'
+        cmd += ' | tar xvf - -C '+outdir
+        cmd = cmd.format(url, coordlist, username, password)
+        print('executing:', cmd.replace(password, '****'))
+    else:
+        cmd = 'curl {} --form list=@{} --user {} --insecure'
+        cmd += ' | tar xvf - -C'+outdir
+        cmd = cmd.format(url, coordlist, username)
+        print('executing:', cmd)
+
     run(cmd, shell=True)
     cwd = os.getcwd()
     os.chdir(outdir)
     arch_dirs = [d for d in os.listdir('.') if d[:4]=='arch']
-    newest = max(arch_dirs, key=os.path.getmtime)
+    if len(arch_dirs)>1:
+        newest = max(arch_dirs, key=os.path.getmtime)
+    else:
+        newest = arch_dirs[0]
     run('mv '+newest+'/* .', shell=True)
     run('rm -r '+newest, shell=True)
     os.chdir(cwd)

@@ -14,7 +14,8 @@ from .. import imfit
 __all__ = ['get_candy_stamps', 'fit_candy_stamps']
 
 
-def get_candy_stamps(cat, label=None, bands='GRI', outdir=None):
+def get_candy_stamps(cat, label=None, bands='GRI', 
+                     outdir=None, obj_type='candy', **kwargs):
     """
     Get postage stamps from database. 
 
@@ -45,8 +46,8 @@ def get_candy_stamps(cat, label=None, bands='GRI', outdir=None):
     cat.write(new_cat_fn)
 
     coordlist_fn = os.path.join(rundir, 'coordlist.txt')
-    hsc.make_query_coordlist(cat, coordlist_fn, bands)
-    hsc.cutout_query(coordlist_fn, outdir=rundir)
+    hsc.make_query_coordlist(cat, coordlist_fn, bands, **kwargs)
+    hsc.cutout_query(coordlist_fn, outdir=rundir, **kwargs)
 
     # give stamps more useful names
     stamp_files = [f for f in os.listdir(rundir) if f[-4:]=='fits']
@@ -58,7 +59,7 @@ def get_candy_stamps(cat, label=None, bands='GRI', outdir=None):
             old_fn = files[i]
             rerun = old_fn.split('-')[-1]
             rerun = rerun.replace('_', '-')
-            new_fn = 'candy-{}-{}-{}'.format(num, bands[i].lower(), rerun)
+            new_fn = obj_type+'-{}-{}-{}'.format(num, bands[i].lower(), rerun)
             old_fn = os.path.join(rundir, old_fn)
             new_fn = os.path.join(rundir, new_fn)
             os.rename(old_fn, new_fn)
