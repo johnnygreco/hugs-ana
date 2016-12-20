@@ -65,17 +65,14 @@ def get_candy_stamps(cat, label=None, bands='GRI',
             os.rename(old_fn, new_fn)
 
 
-def fit_candy_stamps(label, cat=None, bands='GRI', save_figs=True):
+def fit_candy_stamps(rundir, bands='GRI', save_figs=True):
     """
     Fit Seric models to postage-stamp candidate images.
     
     Parameters
     ----------
-    label : string
-        Label for all files/candidates in this run.
-    cat : astropy.table.Table, optional
-        hugs-pipe catalog of candidates. If None, must exist
-        within the "rundir".
+    rundir : string
+        Path to fits files.
     bands : string or list, optional
         Photometric bands to be fit. 
     save_figs : bool
@@ -89,15 +86,8 @@ def fit_candy_stamps(label, cat=None, bands='GRI', save_figs=True):
     index is held fixed. 
     """
 
-    rundir = os.path.join(os.path.join(utils.io, 'stamps'), label)
-
-    # if directory does not exist, get the stamps 
-    if not os.path.isdir(rundir):
-        assert cat is not None
-        get_candy_stamps(cat, label=label, bands=bands)
-    else:
-        cat_fn = os.path.join(rundir, 'candy.cat')
-        cat = Table.read(cat_fn, format='ascii')
+    cat_fn = os.path.join(rundir, 'candy.csv')
+    cat = Table.read(cat_fn)
 
     # get stamp files and group by candidates
     stamp_files = [f for f in os.listdir(rundir) if 
@@ -225,5 +215,5 @@ def fit_candy_stamps(label, cat=None, bands='GRI', save_figs=True):
 
         candy_params = vstack([candy_params, temp_best])
 
-    out_fn = os.path.join(imfitdir, 'candy-imfit-params.cat')
-    candy_params.write(out_fn, format='ascii')
+    out_fn = os.path.join(imfitdir, 'candy-imfit-params.csv')
+    candy_params.write(out_fn)

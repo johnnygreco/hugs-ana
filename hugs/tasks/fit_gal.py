@@ -19,7 +19,7 @@ DEFAULT_PARAMS = {'X0': None , # If None, use center +/- 30 pix
                   'Y0': None,  # If None, use center +/- 30 pix
                   'PA': [18., 0, 360], 
                   'ell': [0.2, 0, 0.99], 
-                  'n': [1.0, 0, 5], 
+                  'n': [1.0, 0.01, 5], 
                   'I_e': 0.05, 
                   'r_e': 20.0}
 
