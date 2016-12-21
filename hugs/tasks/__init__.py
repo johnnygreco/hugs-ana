@@ -1,2 +1,2 @@
-from .fit_gal import *
-from .candy import *
+from .sersic_fit import *
+from .stamps import *

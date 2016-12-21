@@ -11,7 +11,7 @@ import lsst.afw.image
 from .. import imtools
 from .. import imfit
  
-__all__ = ['fit_gal']
+__all__ = ['sersic_fit']
 
 
 DEFAULT_PARAMS = {'X0': None , # If None, use center +/- 30 pix
@@ -35,9 +35,9 @@ DEFAULT_MASK = {'thresh': 1.5,
                                     'deblend_cont': 0.001}}
 
 
-def fit_gal(img_fn, init_params={}, prefix='fit', clean='both', 
-            visualize=False, photo_mask_fn=None,
-            make_mask_kwargs={}, delta_pos=50.0, **kwargs):
+def sersic_fit(img_fn, init_params={}, prefix='fit', clean='both', 
+               visualize=False, photo_mask_fn=None,
+               make_mask_kwargs={}, delta_pos=50.0, **kwargs):
     """
     Perform 2D galaxy fit using the hugs.imfit module, 
     which use imfit and SEP. Most of the work in this function is 
