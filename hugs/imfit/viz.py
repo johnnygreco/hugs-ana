@@ -21,8 +21,6 @@ def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r,
     """
     Show imfit results: image, model, and residual.
     """
-    try: plt.style.use('jpg')
-    except: pass
 
     img = fits.getdata(img_fn)
 
@@ -85,6 +83,8 @@ def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r,
                  fontsize=fs, color=c)
     axes[1].text(x+dx, y-2*dy, chisq, transform=axes[1].transAxes, 
                  fontsize=fs, color=c)
+    axes[1].text(0.9, 0.05, band, color='r', transform=axes[1].transAxes,
+                 fontsize=25)
 
     if show:
         try: import RaiseWindow

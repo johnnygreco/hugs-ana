@@ -11,7 +11,7 @@ import lsst.afw.image
 from .. import imtools
 from .. import imfit
  
-__all__ = ['sersic_fit']
+__all__ = ['sersic_fit', 'DEFAULT_PARAMS', 'DEFAULT_MASK']
 
 
 DEFAULT_PARAMS = {'X0': None , # If None, use center +/- 30 pix
@@ -23,21 +23,21 @@ DEFAULT_PARAMS = {'X0': None , # If None, use center +/- 30 pix
                   'r_e': 20.0}
 
 DEFAULT_MASK = {'thresh': 1.5,
-                'backsize': 100, 
+                'backsize': 110, 
                 'backffrac': 0.5, 
                 'seg_rmin': 100.0, 
                 'obj_rmin': 15.0, 
                 'grow_sig': 6.0, 
                 'mask_thresh': 0.02, 
                 'grow_obj': 3.0, 
-                'kern_sig': 5.0, 
+                'kern_sig': 4.0, 
                 'sep_extract_kws': {'deblend_nthresh': 16, 
                                     'deblend_cont': 0.001}}
 
 
 def sersic_fit(img_fn, init_params={}, prefix='fit', clean='both', 
                visualize=False, photo_mask_fn=None,
-               make_mask_kwargs={}, delta_pos=50.0, **kwargs):
+               mask_kwargs={}, delta_pos=50.0, **kwargs):
     """
     Perform 2D galaxy fit using the hugs.imfit module, 
     which use imfit and SEP. Most of the work in this function is 
@@ -61,7 +61,7 @@ def sersic_fit(img_fn, init_params={}, prefix='fit', clean='both',
     photo_mask_fn : string
         File name of photometry mask. If None, it will be created
         using sep. 
-    make_mask_kwargs : dict, optional
+    mask_kwargs : dict, optional
         Any parameter for hugs.imfit.make_mask except masked_image
         and out_fn, which are set in this function. Can also
     delta_pos : float, optional
@@ -76,14 +76,14 @@ def sersic_fit(img_fn, init_params={}, prefix='fit', clean='both',
     """
 
     mi = lsst.afw.image.MaskedImageF(img_fn)
-    dim = mi.getDimensions()[1], mi.getDimensions()[0]
+    dim = mi.getDimensions()
 
     ######################################################################
     # Get the parameters for hugs.make_mask 
     ######################################################################
 
     mask_params = DEFAULT_MASK.copy()
-    for k,v in list(make_mask_kwargs.items()):
+    for k,v in list(mask_kwargs.items()):
         if k in list(DEFAULT_MASK.keys()):
             mask_params[k] = v
         else:
@@ -99,7 +99,7 @@ def sersic_fit(img_fn, init_params={}, prefix='fit', clean='both',
 
     if imfit_config['X0'] is None:
         assert imfit_config['Y0'] is None
-        gal_pos = dim[1]/2, dim[0]/2
+        gal_pos = dim[0]/2, dim[1]/2
         mask_params['gal_pos'] = gal_pos
         imfit_config['X0'] = [gal_pos[0], gal_pos[0]-delta_pos,
                               gal_pos[0]+delta_pos]
