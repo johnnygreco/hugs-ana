@@ -1,26 +1,21 @@
 """
 Tools for mask making for photometry.
 SEP is used extensively throughout: https://sep.readthedocs.io
-
-The logic and structure of these functions were heavily inspired 
-by Song Huang's work: https://github.com/dr-guangtou/hs_hsc/py
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import division, print_function
 
 import numpy as np
 import scipy.ndimage as ndimage
-
-try:
-    import sep
-except ImportError:
-    print('Warning: You must have sep installed to use hugs.photo!')
-
 from astropy.io import fits
+from astropy.convolution import Gaussian2DKernel
 
-from ..utils import bit_flag_dict
+import lsst.afw.image as afwImage
+import lsst.afw.detection as afwDetect
+import sep
 
-__all__ = ['meas_back', 'detect_sources', 'make_seg_mask', 
+
+__all__ = ['get_hsc_pipe_mask', 'meas_back', 
+           'detect_sources', 'make_seg_mask', 
            'make_obj_mask', 'make_mask']
 
 
@@ -40,6 +35,41 @@ def _outside_circle(cat, xc, yc, r):
     circle centered at (xc, yc) of radius r. 
     """
     return np.sqrt((cat['x']-xc)**2 + (cat['y']-yc)**2) > r
+
+
+def get_hsc_pipe_mask(mask):
+    """
+    Generate photo mask from hsc pipeline mask, where the
+    source is in the center of the image.
+
+    Parameters
+    ----------
+    mask : lsst.afw.image.MaskU
+        Mask object generated from hscPipe.
+
+    Returns
+    -------
+    photo_mask : ndarray
+        Photometry mask, where masked pixels = 1 and
+        all other pixels = 0. 
+    """
+
+    bitmask_thresh = afwDetect.Threshold(
+        mask.getPlaneBitMask(['DETECTED']), afwDetect.Threshold.BITMASK)
+
+    fpset = afwDetect.FootprintSet(mask, bitmask_thresh)
+    det = fpset.insertIntoImage(True).getArray().copy()
+    det[det==det[det.shape[0]//2, det.shape[1]//2]] = 0
+
+    bitmask_thresh = afwDetect.Threshold(
+        mask.getPlaneBitMask(['BRIGHT_OBJECT']), afwDetect.Threshold.BITMASK)
+
+    fpset = afwDetect.FootprintSet(mask, bitmask_thresh)
+    bright = fpset.insertIntoImage(True).getArray().copy()
+
+    photo_mask = ((det>0) | (bright>0)).astype(int)
+
+    return photo_mask
 
 
 def make_seg_mask(seg, grow_sig=6.0, mask_thresh=0.01, mask_max=1000.0):
@@ -132,8 +162,8 @@ def meas_back(img, backsize, backffrac=0.5, mask=None, sub_from_img=True):
         return bkg
 
 
-def detect_sources(img, thresh, backsize, backffrac=0.5, sig=None, 
-                   mask=None, return_all=False, **kwargs):
+def detect_sources(img, thresh, backsize, backffrac=0.5, 
+                   mask=None, return_all=False, kern_sig=5.0, **kwargs):
     """
     Detect sources to construct a mask for photometry. 
 
@@ -149,8 +179,6 @@ def detect_sources(img, thresh, backsize, backffrac=0.5, sig=None,
     backffrac : float, optional
         The fraction of background box size for the 
         filter size for smoothing the background.
-    sig : 2D ndarray, optional
-        Simga image. Must have same shape as img.
     mask : ndarray, optional
         Mask to apply before background estimation.
         Must have same shape as img.
@@ -158,6 +186,11 @@ def detect_sources(img, thresh, backsize, backffrac=0.5, sig=None,
         If True, return the catalog objects, seg map, 
         background image, and the background subtracted
         image. 
+    kern_sig : float, optional
+        Sigma of smoothing Gaussian in pixels.
+    kwargs : dict, optional
+        Keyword args for sep.extract.
+
 
     Returns
     -------
@@ -172,20 +205,23 @@ def detect_sources(img, thresh, backsize, backffrac=0.5, sig=None,
         Background subtracted image.
     """
     img = _byteswap(img)
-    bkg, img = meas_back(img, backsize, backffrac, mask)
-    if sig is None:
-        thresh *= bkg.globalrms
+    if kern_sig:
+        kern = Gaussian2DKernel(kern_sig)
+        kern.normalize()
+        kern = kern.array
     else:
-        sig = _byteswap(sig)
-    obj, seg = sep.extract(img, thresh, err=sig,
-                           segmentation_map=True, **kwargs)
+        kern = None
+    bkg, img = meas_back(img, backsize, backffrac, mask)
+    thresh *= bkg.globalrms
+    obj, seg = sep.extract(
+        img, thresh, segmentation_map=True, filter_kernel=kern, **kwargs)
     return (obj, seg, bkg, img) if return_all else (obj, seg)
 
 
-def make_mask(img, thresh=1.5, backsize=50, backffrac=0.5, sig=None, mask=None,
+def make_mask(masked_image, thresh=1.5, backsize=50, backffrac=0.5,
               out_fn=None, gal_pos='center', seg_rmin=100.0, obj_rmin=20.0, 
-              grow_sig=6.0, mask_thresh=0.02, grow_obj=4.5, mask_from_hsc=True, 
-              sep_extract_params={'deblend_nthresh': 16, 'deblend_cont': 0.001}):
+              grow_sig=6.0, mask_thresh=0.02, grow_obj=4.5, kern_sig=5.0, 
+              sep_extract_kws={}):
     """
     Generate a mask for galaxy photometry using SEP. Many of these
     parameters are those of SEP, so see its documentation for 
@@ -193,19 +229,14 @@ def make_mask(img, thresh=1.5, backsize=50, backffrac=0.5, sig=None, mask=None,
 
     Parameters
     ----------
-    img : 2D ndarray
-        Image to be masked.
+    masked_image : lsst.afw.image.MaskedImageF
+        Masked image object from hscPipe.
     thresh : float, optional
         Detection threshold for source extraction.  
     backsize : int
         Size of box for background estimation.
     backffrac : float, optional
         Fraction of backsize to make the background median filter.
-    sig : 2D ndarray, optional
-        Simga image. Must have same shape as img.
-    mask : ndarray, optional
-        Mask to apply before background estimation.
-        Must have same shape as img.
     gal_pos : array-like, optional
         (x,y) position of galaxy in pixels. If 'center', the 
         center of the image is assumed.
@@ -223,13 +254,8 @@ def make_mask(img, thresh=1.5, backsize=50, backffrac=0.5, sig=None, mask=None,
         in the seg mask. 
     grow_obj : float, optional
         Fraction to grow the objects of the obj mask. 
-    mask_from_hsc : bool, optional
-        If True, the input mask is from the HSC pipeline. 
-    sep_extract_params : dict, optional
-        Extra parameters for SEP's extract function. By extra, 
-        we mean parameters that are not given as input to 
-        this function: 
-        (http://sep.readthedocs.io/en/v0.6.x/api/sep.extract.html)
+    sep_extract_kws: dict, optional
+        Keywords from sep.extract.
     out_fn : string, optional
         If not None, save the mask with this file name. 
         
@@ -238,32 +264,30 @@ def make_mask(img, thresh=1.5, backsize=50, backffrac=0.5, sig=None, mask=None,
     final_mask : 2D ndarray
         Final mask to apply to img, where 0 represents good pixels
         and 1 masked pixels. The final mask is a combination of 
-        a segmentation, object, and (if given) HSC's bad pixel 
-        mask. 
+        a segmentation, object, and  HSC's detection footprints.
     """
+
+    img = masked_image.getImage().getArray().copy()
+    mask = masked_image.getMask().getArray().copy()
+
     if gal_pos=='center':
         gal_x, gal_y = (img.shape[1]/2, img.shape[0]/2)
     else:
         gal_x, gal_y = gal_pos
 
     #################################################################
-    # If an HSC mask is given, use the non-detection bits as a bad 
-    # pixel map. 
+    # Generate mask from hscPipe footprints.
     #################################################################
 
-    if (mask is not None) and mask_from_hsc:
-        hsc_bad_mask = mask.copy()
-        detected = bit_flag_dict['DETECTED']
-        hsc_bad_mask[hsc_bad_mask==detected] = 0
-    else:
-        hsc_bad_mask = np.zeros(img.shape, dtype=int)
+    hsc_bad_mask = get_hsc_pipe_mask(masked_image.getMask())
     
     #################################################################
     # Detect sources in image to mask before we do photometry.
     #################################################################
 
-    obj, seg, bkg, img = detect_sources(img, thresh, backsize, backffrac, sig, 
-                                        mask, True, **sep_extract_params)
+    obj, seg, bkg, img = detect_sources(
+        img, thresh, backsize, backffrac,
+        mask, True, kern_sig, **sep_extract_kws)
 
     #################################################################
     # Exclude objects inside seg_rmin and obj_rmin. Note that the 
@@ -279,8 +303,8 @@ def make_mask(img, thresh=1.5, backsize=50, backffrac=0.5, sig=None, mask=None,
     obj = obj[keepers]
 
     #################################################################
-    # Generate segmentation and object masks. Combine with HSC bad 
-    # pixel mask (if given) to form the final mask.
+    # Generate segmentation and object masks. Combine with HSC 
+    # detection footprints.
     #################################################################
     
     seg_mask = make_seg_mask(seg, grow_sig, mask_thresh)

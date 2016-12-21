@@ -1,14 +1,14 @@
 """
 Collection of visualization functions for imfit. 
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import division, print_function
+                     
 
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
 
-from ..models import Sersic
+from .sersic import Sersic
 from ..utils import pixscale
 from toolbox.utils.plotting import ticks_off
 from toolbox.image import zscale
