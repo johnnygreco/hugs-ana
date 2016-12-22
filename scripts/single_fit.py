@@ -14,6 +14,7 @@ parser.add_argument('group_id', type=str)
 parser.add_argument('candy_num', type=int)
 parser.add_argument('-p', '--path', type=str, default=path)
 parser.add_argument('-o', '--outdir', type=str, default=temp)
+parser.add_argument('--no_psf', action='store_true')
 
 for k, v in hugs.tasks.DEFAULT_MASK.items():
     if k!='sep_extract_kws':
@@ -45,4 +46,4 @@ ell = cat['ellipticity'][num]
 init_params = {'PA': [pa, 0, 180],
 	       'ell': [ell, 0, 0.999]}
 hugs.tasks.fit_candy(num, rundir, args.outdir, init_params,
-                     mask_kwargs=mask_kwargs)
+                     mask_kwargs=mask_kwargs, use_psf=not args.no_psf)

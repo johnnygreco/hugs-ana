@@ -13,7 +13,8 @@ SERSIC_PARAMS = ['X0', 'Y0', 'PA', 'ell', 'n', 'I_e', 'r_e']
 
 
 def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,  
-        save_res=False, out_fn='bestfit_imfit_params.dat', config=None):
+        save_res=False, out_fn='bestfit_imfit_params.dat', 
+        config=None, psf_fn=None):
     """
     Run imfit.
 
@@ -37,13 +38,14 @@ def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,
     config : dict, optional
         Configuration parameters to be written to config_fn. If None, 
         will assume config_fn already exists.
+    psf_fn : str, optional
+        PSF fits file.
 
     Returns
     -------
     results : dict
         Imfit's best-fit parameters and the reduced chi-square
         value of the fit. 
-
     """
 
     import subprocess
@@ -52,6 +54,8 @@ def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,
         cmd += "--mask '"+mask_fn+"' "
     if var_fn is not None:
         cmd += "--noise '"+var_fn+"' --errors-are-variances "
+    if psf_fn is not None:
+        cmd += "--psf '"+psf_fn+"' "
     if save_model:
         save_fn = img_fn[:-8] if img_fn[-1]==']' else img_fn[:-5]
         save_fn += '_model.fits'

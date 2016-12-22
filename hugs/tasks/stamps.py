@@ -66,7 +66,7 @@ def get_candy_stamps(cat, label=None, bands='GRI',
 
 
 def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
-              mask_kwargs={}):
+              mask_kwargs={}, cat=None, use_psf=True):
     """
     Fit single candidate.
 
@@ -80,7 +80,13 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
     import lsst.afw.image 
     import lsst.afw.geom 
     plt.style.use('jpg')
+    if cat is None:
+        cat_fn = os.path.join(indir, 'candy.csv')
+        cat = Table.read(cat_fn)
 
+    tract, patch = cat['tract', 'patch'][num]
+    psf_dir = os.path.join(os.environ.get('HUGS_PIPE_IO'), 'patch-psfs')
+ 
     files = [f for f in os.listdir(indir) if 
              f.split('-')[-1]=='wide.fits' and int(f.split('-')[1])==num]
 
@@ -96,13 +102,19 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
         band = fn.split('-')[2]
         fn = os.path.join(indir, fn)
         prefix = os.path.join(outdir, 'candy-{}-{}'.format(num, band))
+        if use_psf:
+            psf_fn = 'psf-{}-{}-{}.fits'.format(band.upper(), tract, patch)
+            psf_fn = os.path.join(psf_dir, psf_fn)
+        else:
+            psf_fn = None
         sersic = sersic_fit(fn, 
                             prefix=prefix,
                             init_params=init_params,
                             visualize=False, 
                             band=band, 
                             clean='config', 
-                            mask_kwargs=mask_kwargs)
+                            mask_kwargs=mask_kwargs, 
+                            psf_fn=psf_fn)
         r_e_err.append(sersic.r_e_err/sersic.r_e)
         fits.append(sersic)
         mask_files.append(prefix+'_photo_mask.fits')
@@ -164,13 +176,19 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
                 }
             prefix = 'candy-{}-{}-forced-{}'.format(num, band, best_band)
             prefix = os.path.join(outdir, prefix)
+            if use_psf:
+                psf_fn = 'psf-{}-{}-{}.fits'.format(band.upper(), tract, patch)
+                psf_fn = os.path.join(psf_dir, psf_fn)
+            else:
+                psf_fn = None
             sersic = sersic_fit(fn, 
                              prefix=prefix,
                              init_params=init_params,
                              visualize=False, 
                              clean='config',
                              band=band,
-                             photo_mask_fn=mask_files[best_idx])
+                             photo_mask_fn=mask_files[best_idx], 
+                             psf_fn=psf_fn)
 
             # generate output columns for other bands
             data = [sersic.m_tot, sersic.mu_0, sersic.ell,
@@ -203,7 +221,7 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
     return results
 
 
-def run_batch_fit(rundir, bands='GRI', save_figs=True):
+def run_batch_fit(rundir, bands='GRI', save_figs=True, use_psf=True):
     """
     Fit Seric models to postage-stamp candidate images.
     
@@ -240,7 +258,8 @@ def run_batch_fit(rundir, bands='GRI', save_figs=True):
         init_params = {'PA': [pa, 0, 180],
                        'ell': [ell, 0, 0.999]}
         results = fit_candy(
-            num, rundir, imfitdir, init_params, save_figs)
+            num, rundir, imfitdir, init_params, save_figs, cat=cat,
+            use_psf=use_psf)
         candy_params = vstack([candy_params, results])
 
     out_fn = os.path.join(imfitdir, 'candy-imfit-params.csv')
