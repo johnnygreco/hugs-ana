@@ -6,13 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.table import Table
-import hugs
-import hugs_pipe as hp
-from toolbox.cosmo import Cosmology
-cosmo = Cosmology()
 cmap = plt.cm.rainbow
 plt.style.use('jpg')
-datDIR = os.path.join(os.environ.get('DATA_DIR'), 'gemini_FT_6-2016/')
 
 def make_plot(subplots=None):
 
@@ -21,6 +16,7 @@ def make_plot(subplots=None):
     else:
         fig, a = subplots
 
+    datDIR = os.path.join(os.environ.get('DATA_DIR'), 'gemini_FT_6-2016/')
     vanDokkum = Table.read(datDIR+'vanDokkum2015_Table_1.txt', format='ascii')
     brodie = np.genfromtxt(datDIR+'sizetable.txt', 
                            names=('id', 'host', 'M_V', 'logr', 'ref'), 
@@ -46,8 +42,8 @@ def make_plot(subplots=None):
               alpha=0.8, label='Mihos et al. 2015')
     a.scatter(brodie['M_V'], brodie['logr']+np.log10(1e-3), c='gray', 
               alpha=0.4, zorder=-10, label='Brodie et al. 2011')
-    a.set_ylim(-1, 1.6)
-    a.set_xlim(-25,-5)
+    a.set_ylim(-1.1, 1.6)
+    a.set_xlim(-26,-4)
     a.set_ylabel(r'$\log_{10}(r_\mathrm{eff}\ [\mathrm{kpc}])$')
     a.set_xlabel(r'Absolute $g$-band Magnitude')
     a.minorticks_on()
@@ -70,17 +66,21 @@ def make_plot(subplots=None):
     a.text(x+3*dx, y, '24',rotation=rot,fontsize=fs, va='bottom') 
 
     a.text(-5.8, -.4, r'${\bf dSphs}$', color='gray', fontsize=20)
-    a.text(-10.3, .4, r'${\bf UDGs}$', color=cmap(0.85), fontsize=20)
+    a.text(-10.3, .4, r'${\bf UDGs}$', color=cmap(0), fontsize=20)
     a.text(-20.5, 1.05, r'${\bf gEs}$', color='gray', fontsize=20)
     a.text(-18, -.8, r'${\bf cEs}$', color='gray', fontsize=20)
     a.text(-14.1, -0.32, r'${\bf dEs}$', color='gray', fontsize=20)
     a.legend(loc='upper left', fontsize=18, labelspacing=0.7)
+
+    a.tick_params(axis='both', labelsize=18)
 
     return fig, a
 
 def get_candy(path, remove_duplicates=True):
     from toolbox.astro import angsep
     from hugs.datasets import yang
+    from toolbox.cosmo import Cosmology
+    cosmo = Cosmology()
 
     groups = yang.load_groups().to_pandas()
     group_dirs = [os.path.join(path, g) for g in os.listdir(path) if g[:5]=='group']
@@ -115,7 +115,8 @@ def get_candy(path, remove_duplicates=True):
     df_candy.reset_index(inplace=True)
 
     if remove_duplicates:
-        hp.cattools.remove_duplicates(df_candy)
+        from hugs_pipe.cattools import remove_duplicates
+        remove_duplicates(df_candy)
 
     return df_candy
 
@@ -127,9 +128,13 @@ if __name__=='__main__':
     fig, ax = make_plot()
     candy = get_candy(path) 
 
-    ax.scatter(candy['Mg'], np.log10(candy['r_kpc(g)']), s=120, alpha=0.6, 
-               edgecolors='k', color=cmap(0), label='HSC UDGs')
-    ax.legend(loc='upper left', fontsize=18, labelspacing=0.7)
+    ax.scatter(candy['Mg'], np.log10(candy['r_kpc(g)']), s=120, alpha=0.5, 
+               edgecolors='k', color=cmap(0), label='HSC UDGs (this work)')
+
+    handles, labels = ax.get_legend_handles_labels()
+    handles = [handles[-1]] + handles[:-1]
+    labels = [labels[-1]] + labels[:-1]
+    ax.legend(handles, labels, loc='upper left', fontsize=18, labelspacing=0.7)
 
     fig.savefig(os.path.join(savedir, 'size_vs_mag.pdf'))
 

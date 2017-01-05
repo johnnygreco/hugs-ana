@@ -1,5 +1,3 @@
-#!/usr/bin/env python 
-
 from __future__ import division, print_function
 
 import os
@@ -20,6 +18,10 @@ cosmo = Cosmology()
 datadir = '../../data/mycats/'
 fn = 'cat_z0.065_Mh12.75-14.0_group_info.txt'
 groups = Table.read(datadir+fn, format='ascii')
+
+groups = groups[groups['z']<0.05]
+print(len(groups))
+
 coords = SkyCoord(ra=groups['ra']*u.degree, 
                   dec=groups['dec']*u.degree, 
                   frame='icrs')
@@ -112,5 +114,6 @@ a5.hist(groups['z'], color='k')
 a5.set_xlabel(r'$z$')
 f5.savefig('../figures/groups_z_hist.pdf', bbox_inches='tight')
 
-import RaiseWindow
+try: import RaiseWindow
+except: pass
 plt.show()
