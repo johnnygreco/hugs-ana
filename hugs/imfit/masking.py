@@ -37,7 +37,7 @@ def _outside_circle(cat, xc, yc, r):
     return np.sqrt((cat['x']-xc)**2 + (cat['y']-yc)**2) > r
 
 
-def get_hsc_pipe_mask(mask):
+def get_hsc_pipe_mask(mask, gal_pos):
     """
     Generate photo mask from hsc pipeline mask, where the
     source is in the center of the image.
@@ -46,6 +46,8 @@ def get_hsc_pipe_mask(mask):
     ----------
     mask : lsst.afw.image.MaskU
         Mask object generated from hscPipe.
+    gal_pos : tuple
+        The (x, y) position of the galaxy.
 
     Returns
     -------
@@ -59,7 +61,9 @@ def get_hsc_pipe_mask(mask):
 
     fpset = afwDetect.FootprintSet(mask, bitmask_thresh)
     det = fpset.insertIntoImage(True).getArray().copy()
-    det[det==det[det.shape[0]//2, det.shape[1]//2]] = 0
+
+    i, j = int(gal_pos[1]), int(gal_pos[0])
+    det[det==det[i, j]] = 0
 
     bitmask_thresh = afwDetect.Threshold(
         mask.getPlaneBitMask(['BRIGHT_OBJECT']), afwDetect.Threshold.BITMASK)
@@ -279,7 +283,7 @@ def make_mask(masked_image, thresh=1.5, backsize=50, backffrac=0.5,
     # Generate mask from hscPipe footprints.
     #################################################################
 
-    hsc_bad_mask = get_hsc_pipe_mask(masked_image.getMask())
+    hsc_bad_mask = get_hsc_pipe_mask(masked_image.getMask(), gal_pos)
     
     #################################################################
     # Detect sources in image to mask before we do photometry.
