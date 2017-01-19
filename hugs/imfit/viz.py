@@ -92,4 +92,4 @@ def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r,
         plt.show()
 
     if save_fn is not None:
-        fig.savefig(save_fn)
+        fig.savefig(save_fn, bbox_inches='tight')
