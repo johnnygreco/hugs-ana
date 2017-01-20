@@ -14,7 +14,7 @@ SERSIC_PARAMS = ['X0', 'Y0', 'PA', 'ell', 'n', 'I_e', 'r_e']
 
 def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,  
         save_res=False, out_fn='bestfit_imfit_params.dat', 
-        config=None, psf_fn=None, poisson_mlr=False):
+        config=None, psf_fn=None, poisson_mlr=False, quiet=False):
     """
     Run imfit.
 
@@ -40,8 +40,11 @@ def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,
         will assume config_fn already exists.
     psf_fn : str, optional
         PSF fits file.
-    poisson_mlr : bool
+    poisson_mlr : bool, optional
         If True, use Poisson maximum-likelihood ratio.
+    quiet: bool, optional
+        If True, supress printing of intermediate fit-statistic
+        vaules during the fitting process.
 
     Returns
     -------
@@ -60,6 +63,8 @@ def run(img_fn, config_fn, mask_fn=None, var_fn=None, save_model=False,
         cmd += "--psf '"+psf_fn+"' "
     if poisson_mlr:
         cmd += '--poisson-mlr '
+    if quiet:
+        cmd += '--quiet '
     if save_model:
         save_fn = img_fn[:-8] if img_fn[-1]==']' else img_fn[:-5]
         save_fn += '_model.fits'

@@ -37,7 +37,7 @@ DEFAULT_MASK = {'thresh': 1.5,
 
 def sersic_fit(img_fn, init_params={}, prefix='fit', clean='both', 
                visualize=False, photo_mask_fn=None, mask_kwargs={}, 
-               delta_pos=50.0, psf_fn=None, **kwargs):
+               delta_pos=50.0, psf_fn=None, quiet=False):
     """
     Perform 2D galaxy fit using the hugs.imfit module, 
     which use imfit and SEP. Most of the work in this function is 
@@ -129,12 +129,12 @@ def sersic_fit(img_fn, init_params={}, prefix='fit', clean='both',
     config_fn = prefix+'_config.txt'
     out_fn = prefix+'_bestfit_params.txt'
     var_fn = img_fn+'[3]'
-    results = imfit.run(img_fn+'[1]', config_fn, photo_mask_fn, var_fn,
-                        out_fn=out_fn, config=imfit_config, psf_fn=psf_fn)
+    results = imfit.run(
+        img_fn+'[1]', config_fn, photo_mask_fn, var_fn,
+        out_fn=out_fn, config=imfit_config, psf_fn=psf_fn, quiet=quiet)
 
     if visualize:
-        imfit.viz.img_mod_res(img_fn, results, photo_mask_fn, 
-                              figsize=(16,6), **kwargs)
+        imfit.viz.img_mod_res(img_fn, results, photo_mask_fn, figsize=(16,6))
 
     if (clean=='mask') or (clean=='both'):
         os.remove(photo_mask_fn)
