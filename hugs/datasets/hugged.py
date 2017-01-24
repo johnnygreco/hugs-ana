@@ -33,6 +33,7 @@ class CatButler(object):
         self.logMh_lims = [float(m) for m in self.labels[1][2:].split('-')]
         
         self._patches_dict = None
+        self._group_props = None
 
     @property
     def patches_dict(self):
@@ -42,6 +43,14 @@ class CatButler(object):
             self._patches_dict = np.load(fn).item()
         return self._patches_dict
 
+    @property
+    def group_props(self):
+        if self._group_props is None:
+            fn = 'cat_{}_{}_group_info.csv'.format(*self.labels)
+            fn = os.path.join(self.rundir, fn)
+            self._group_props = pd.read_csv(fn)
+        return self._group_props
+
     def get_group_cat(self, group_id, kind='candy', fn=None):
 
         fn = fn if fn else self.prefix+'-cat-'+kind+'.csv'
@@ -49,7 +58,11 @@ class CatButler(object):
         df = []
         for tract, patch in self.patches_dict[group_id]:
             path = os.path.join(self.rundir, str(tract)+'/'+patch)            
-            patch_df = pd.read_csv(os.path.join(path, fn))
+            patch_fn = os.path.join(path, fn)
+            if os.path.isfile(patch_fn):
+                patch_df = pd.read_csv(patch_fn)
+            else:
+                patch_df = pd.DataFrame()
             patch_df['tract'] = tract
             patch_df['patch'] = patch 
             df.append(patch_df)
