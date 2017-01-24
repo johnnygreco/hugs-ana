@@ -5,9 +5,10 @@ import os
 import numpy as np
 from astropy.table import Table
 yangdir = os.path.join(os.environ.get('DATA_DIR'), 'catalogs/Yang')
+local_io = os.environ.get('LOCAL_IO')
 
 __all__ = ['load_groups', 'load_gals', 'load_bcgs', 
-           'get_group_prop', 'nearest_group']
+           'get_group_patches', 'get_group_prop', 'nearest_group']
 
 
 def load_groups():
@@ -46,6 +47,18 @@ def load_bcgs():
     bcgs.remove_column('vagc_id')
     bcgs.sort('group_id')
     return bcgs
+
+
+def get_group_patches(group_id, z_max=0.05, Mh_lims=[12.5, 15.0]):
+    """
+    Get HSC patches associated with Yang galaxy group(s).
+    """
+    prefix = 'cat_z{}_Mh{}-{}'.format(z_max, Mh_lims[0], Mh_lims[1])
+    patch_dir = os.path.join(local_io, 'group-patches')
+    prefix = os.path.join(patch_dir, prefix)
+    patches_fn = prefix+'_tracts_n_patches.npy'
+    patches_dict = np.load(patches_fn).item()
+    return Table(patches_dict[group_id]) if group_id else patches_dict
 
 
 def get_group_prop(group_id, keys):
