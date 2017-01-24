@@ -7,6 +7,7 @@ from __future__ import division, print_function
 
 import os
 import numpy as np
+import pandas as pd
 import hugs
 from spherical_geometry.polygon import SphericalPolygon
 
@@ -19,9 +20,9 @@ cosmo = Cosmology()
 pointings = hugs.datasets.hsc.load_pointings('i')
 groups = hugs.datasets.yang.load_groups()
 
-Mh_min = 12.75
+Mh_min = 12.5
 Mh_max = 15.0
-max_z = 0.065
+max_z = 0.05
 max_sep = 0.75 # degrees
 num_r_vir = 2.0
 bands = 'GRI'
@@ -56,6 +57,7 @@ butler = lsst.daf.persistence.Butler(dir)
 skymap = butler.get('deepCoadd_skyMap', immediate=True)
 exist_mask = np.zeros(len(groups_match), dtype=bool)
 
+df = []
 for i, cl in enumerate(coord_lists):
     r, _ = lsstutils.tracts_n_patches(cl, skymap)
     does_exist = True
@@ -72,9 +74,17 @@ for i, cl in enumerate(coord_lists):
     if does_exist:
         exist_mask[i] = True
         result.update({groups_match['group_id'][i]: r})
+        df.append(pd.DataFrame(r))
 groups_match = groups_match[exist_mask]
 
 dir = '../../results/'
+
+df = pd.concat(df, ignore_index=True)
+df.drop_duplicates(inplace=True)
+df.reset_index(inplace=True, drop=True)
+fn = dir+'patches_z{}_Mh{}-{}.csv'.format(max_z, Mh_min, Mh_max)
+df.to_csv(fn, index=False)
+
 prefix = 'cat_z{}_Mh{}-{}'.format(max_z, Mh_min, Mh_max)
 fn = prefix+'_tracts_n_patches.npy'
 np.save(dir+fn, result)
