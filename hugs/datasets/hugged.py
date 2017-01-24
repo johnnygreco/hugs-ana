@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 hugs_pipe_io = os.environ.get('HUGS_PIPE_IO')
 
-__all_ = ['HugsCat', 'merge_synth_cats']
+__all_ = ['CatButler', 'merge_synth_cats']
 
 
 def _find_most_recent(path=hugs_pipe_io, label='batch-run'):
@@ -16,7 +16,7 @@ def _find_most_recent(path=hugs_pipe_io, label='batch-run'):
     return os.path.join(path, dirs[-1])
 
 
-class HugsCat(object):
+class CatButler(object):
 
     def __init__(self, rundir=None, synths=False):
 
