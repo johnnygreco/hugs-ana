@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 hugs_pipe_io = os.environ.get('HUGS_PIPE_IO')
 
-__all_ = ['CatButler', 'merge_synth_cats']
+__all_ = ['CatButler', 'merge_synth_cats', 'get_group_cats']
 
 
 def _find_most_recent(path=hugs_pipe_io, label='batch-run'):
@@ -34,6 +34,7 @@ class CatButler(object):
         
         self._patches_dict = None
         self._group_props = None
+        self._unique_patches = None
 
     @property
     def patches_dict(self):
@@ -51,23 +52,24 @@ class CatButler(object):
             self._group_props = pd.read_csv(fn)
         return self._group_props
 
-    def get_group_cat(self, group_id, kind='candy', fn=None):
+    @property
+    def unique_patches(self):
+        if self._unique_patches is None:
+            fn = 'patches_{}_{}.csv'.format(*self.labels)
+            fn = os.path.join(self.rundir, fn)
+            self._unique_patches =  pd.read_csv(fn)
+        return self._unique_patches
 
+    def get_patch_cat(self, tract, patch, kind='candy', fn=None):
         fn = fn if fn else self.prefix+'-cat-'+kind+'.csv'
-
-        df = []
-        for tract, patch in self.patches_dict[group_id]:
-            path = os.path.join(self.rundir, str(tract)+'/'+patch)            
-            patch_fn = os.path.join(path, fn)
-            if os.path.isfile(patch_fn):
-                patch_df = pd.read_csv(patch_fn)
-            else:
-                patch_df = pd.DataFrame()
-            patch_df['tract'] = tract
-            patch_df['patch'] = patch 
-            df.append(patch_df)
-        df = pd.concat(df, ignore_index=True)
-
+        path = os.path.join(self.rundir, str(tract)+'/'+patch)            
+        patch_fn = os.path.join(path, fn)
+        if os.path.isfile(patch_fn):
+            df = pd.read_csv(patch_fn)
+            df['tract'] = tract
+            df['patch'] = patch
+        else:
+            df = pd.DataFrame({'tract': [tract], 'patch': [patch]})
         if fn=='synths.csv':
             df.rename(columns={'patch_id': 'synth_id'}, inplace=True)
             df.rename(columns={'mu0_'+b: 'mu_0('+b+')' for b in 'gri' }, 
@@ -77,6 +79,34 @@ class CatButler(object):
             for col in df.columns:
                 if col not in ['tract', 'patch', 'synth_id']:
                     df.rename(columns={col: col+'_syn'}, inplace=True)
+        return df
+
+    def get_group_cat(self, group_id, **kwargs):
+        df = []
+        for tract, patch in self.patches_dict[group_id]:
+            group_df = self.get_patch_cat(tract, patch, **kwargs)
+            group_df['group_id'] = group_id
+            df.append(group_df)
+        df = pd.concat(df, ignore_index=True)
+        return df
+
+    def combine_group_cats(self, groups=None, **kwargs):
+        if groups is None:
+            groups = self.group_props.group_id.values
+        df = []
+        for g in groups:
+            df.append(self.get_group_cat(g, **kwargs))
+        df = pd.concat(df, ignore_index=True)
+        return df
+
+    def combine_patch_cats(self, patches=None, **kwargs):
+        if patches is None:
+            patches = self.unique_patches
+        df = []
+        for _, row in patches.iterrows():
+            tract, patch = row[['tract', 'patch']]
+            df.append(self.get_patch_cat(tract, patch, **kwargs))
+        df = pd.concat(df, ignore_index=True)
         return df
 
 
