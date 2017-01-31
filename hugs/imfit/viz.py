@@ -64,8 +64,8 @@ def img_mod_res(img_fn, mod_params, mask_fn=None, cmap=plt.cm.gray_r,
     fs = 17
     m_tot = r'$m_'+band+'='+str(round(s.m_tot, 1))+'$'
     r_e = r'$r_\mathrm{eff}='+str(round(s.r_e*pixscale,1))+'^{\prime\prime}$'
-    mu_0 = r'$\mu_0='+str(round(s.mu_0,1))+'$ mag/arcsec$^2$'
-    mu_e = r'$\mu_e='+str(round(s.mu_e,1))+'$ mag/arcsec$^2$'
+    mu_0 = r'$\mu_0='+str(round(s.mu_0,1))+'$'
+    mu_e = r'$\mu_e='+str(round(s.mu_e,1))+'$'
     n = r'$n = '+str(round(s.n,2))+'$'
     chisq = r'$\chi^2_\mathrm{dof} = '+\
             str(round(mod_params['reduced_chisq'],2))+'$' 

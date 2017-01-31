@@ -66,7 +66,8 @@ def get_candy_stamps(cat, label=None, bands='GRI',
 
 
 def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
-              mask_kwargs={}, cat=None, use_psf=True):
+              mask_kwargs={}, tract=None, patch=None, 
+              use_psf=True, butler=None):
     """
     Fit single candidate.
 
@@ -79,12 +80,11 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
     """
     import lsst.afw.image 
     import lsst.afw.geom 
-    plt.style.use('jpg')
-    if cat is None:
+    if tract is None or patch is None:
         cat_fn = os.path.join(indir, 'candy.csv')
         cat = Table.read(cat_fn)
+        tract, patch = cat['tract', 'patch'][num]
 
-    tract, patch = cat['tract', 'patch'][num]
     psf_dir = os.path.join(os.environ.get('HUGS_PIPE_IO'), 'patch-psfs')
  
     files = [f for f in os.listdir(indir) if 
@@ -96,7 +96,7 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
 
     # fit all bands separately
     r_e_err = []
-    fits = []
+    fit_list = []
     mask_files = [] 
     for fn in files:
         band = fn.split('-')[2]
@@ -105,24 +105,36 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
         if use_psf:
             psf_fn = 'psf-{}-{}-{}.fits'.format(band.upper(), tract, patch)
             psf_fn = os.path.join(psf_dir, psf_fn)
+            if not os.path.isfile(psf_fn):
+                from astropy.io import fits
+                print('generating psf file for', tract, patch, band)
+                if butler is None:
+                    import lsst.daf.persistence
+                    hscdir = os.environ.get('HSC_DIR')
+                    butler = lsst.daf.persistence.Butler(hscdir)
+                data_id = {'tract': tract, 
+                           'patch': patch, 
+                           'filter': 'HSC-'+band.upper()}
+                exp = butler.get('deepCoadd_calexp', data_id, immediate=True)
+                psf = exp.getPsf().computeImage().getArray().copy()
+                fits.writeto(psf_fn, psf, clobber=True)
         else:
             psf_fn = None
         sersic = sersic_fit(fn, 
                             prefix=prefix,
                             init_params=init_params,
                             visualize=False, 
-                            band=band, 
                             clean='config', 
                             mask_kwargs=mask_kwargs, 
                             psf_fn=psf_fn)
         r_e_err.append(sersic.r_e_err/sersic.r_e)
-        fits.append(sersic)
+        fit_list.append(sersic)
         mask_files.append(prefix+'_photo_mask.fits')
     r_e_err = np.array(r_e_err)
     best_idx = r_e_err.argmin()
     best_band = files[best_idx].split('-')[2]
 
-    best = fits[best_idx]
+    best = fit_list[best_idx]
 
     # get wcs for best fit object
     best_fn = os.path.join(indir, files[best_idx])
@@ -153,7 +165,7 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
     
     if save_figs:
         imfit.viz.img_mod_res(os.path.join(indir, files[best_idx]), 
-                              fits[best_idx].params, 
+                              fit_list[best_idx].params, 
                               mask_files[best_idx], 
                               band=best_band,
                               subplots=(fig, axes[0]),
@@ -166,13 +178,13 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
             band = fn.split('-')[2]
             fn = os.path.join(indir, fn)
             init_params = {
-                'X0': [fits[best_idx].X0, 'fixed'],
-                'Y0': [fits[best_idx].Y0, 'fixed'],
-                'n': [fits[best_idx].n, 'fixed'],
-                'PA': [fits[best_idx].PA, 'fixed'],
-                'ell': [fits[best_idx].ell, 'fixed'],
-                'r_e': fits[best_idx].r_e,
-                'I_e': fits[idx].I_e
+                'X0': [fit_list[best_idx].X0, 'fixed'],
+                'Y0': [fit_list[best_idx].Y0, 'fixed'],
+                'n': [fit_list[best_idx].n, 'fixed'],
+                'PA': [fit_list[best_idx].PA, 'fixed'],
+                'ell': [fit_list[best_idx].ell, 'fixed'],
+                'r_e': fit_list[best_idx].r_e,
+                'I_e': fit_list[idx].I_e
                 }
             prefix = 'candy-{}-{}-forced-{}'.format(num, band, best_band)
             prefix = os.path.join(outdir, prefix)
@@ -182,13 +194,12 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
             else:
                 psf_fn = None
             sersic = sersic_fit(fn, 
-                             prefix=prefix,
-                             init_params=init_params,
-                             visualize=False, 
-                             clean='config',
-                             band=band,
-                             photo_mask_fn=mask_files[best_idx], 
-                             psf_fn=psf_fn)
+                                prefix=prefix,
+                                init_params=init_params,
+                                visualize=False, 
+                                clean='config',
+                                photo_mask_fn=mask_files[best_idx], 
+                                psf_fn=psf_fn)
 
             # generate output columns for other bands
             data = [sersic.m_tot, sersic.mu_0, sersic.ell,
@@ -213,7 +224,7 @@ def fit_candy(num, indir, outdir, init_params={}, save_figs=True,
         os.remove(mask_fn)
 
     if save_figs:
-        fig_fn = 'candy-{}-fit-results.pdf'.format(num)
+        fig_fn = 'candy-{}-fit-results.png'.format(num)
         fig_fn = os.path.join(outdir, fig_fn)
         fig.savefig(fig_fn)
         plt.close('all')
@@ -252,11 +263,16 @@ def run_batch_fit(rundir, bands='GRI', save_figs=True, use_psf=True):
     candy_params = Table()
     for num in range(num_candy):	
         # get initial guess parameters
-        pa = cat['orientation'][num] * 180.0/np.pi
-        pa = 90 + pa 
-        ell = cat['ellipticity'][num]
+        pa = cat['PA'][num] 
+        ell = cat['ell'][num]
+        n = cat['n'][num]
+        I_e = cat['I_e(i)'][num]
+        r_e = cat['r_e(i)'][num]*(1/0.168)
         init_params = {'PA': [pa, 0, 180],
-                       'ell': [ell, 0, 0.999]}
+                       'ell': [ell, 0, 0.999],
+                       'n': [n, 0.001, 5.0],
+                       'I_e': I_e,
+                       'r_e': r_e}
         results = fit_candy(
             num, rundir, imfitdir, init_params, save_figs, cat=cat,
             use_psf=use_psf)
