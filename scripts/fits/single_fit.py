@@ -57,4 +57,4 @@ results = hugs.tasks.fit_candy(
     mask_kwargs=mask_kwargs, use_psf=not args.no_psf)
 
 out_fn = 'candy-{}-imfit-params.csv'.format(args.candy_num)
-results.write(os.path.join(temp, out_fn))
+results.write(os.path.join(args.outdir, out_fn))
