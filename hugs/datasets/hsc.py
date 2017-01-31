@@ -76,7 +76,10 @@ def cutout_query(coordlist, username='grecoj', outdir=None,
         Output direction for cutouts. If None, will use 
         date and time label. 
     """
-    from subprocess import run
+    try:
+        from subprocess import run
+    except ImportError:
+        from subprocess import call as run
 
     if outdir is None:
         import time
