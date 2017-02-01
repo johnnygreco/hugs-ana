@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 hugs_pipe_io = os.environ.get('HUGS_PIPE_IO')
 
-__all_ = ['CatButler', 'merge_synth_cats', 'get_group_cats']
+__all_ = ['CatButler', 'merge_synth_cats', 
+          'get_group_cats', 'remove_duplicates']
 
 
 def _find_most_recent(path=hugs_pipe_io, label='batch-run'):
@@ -108,6 +109,33 @@ class CatButler(object):
             df.append(self.get_patch_cat(tract, patch, **kwargs))
         df = pd.concat(df, ignore_index=True)
         return df
+
+
+def remove_duplicates(cat, min_sep=0.7, group_ids=None):
+    """
+    Build mask for double entries in a catalog. 
+    Consider object within min_sep arcsec the same object
+    """
+    from toolbox.astro import angsep
+    mask = np.ones(len(cat), dtype=bool)
+    cat.reset_index(drop=True, inplace=True)
+    counts = []
+    for i, (ra, dec) in enumerate(cat[['ra','dec']].values):
+        # don't search objects flagged as double entries
+        if mask[i]==True:
+            seps = angsep(ra, dec, cat['ra'], cat['dec'])
+            unique = seps > min_sep
+            unique[i] = True # it will certainly match itself
+            mask &= unique   # double entries set to False
+            if group_ids is not None:
+                counts.append(cat.loc[~unique, group_ids].sum(axis=0).values)
+        else:
+            if group_ids is not None:
+                counts.append(np.zeros(len(group_ids)))
+    if group_ids is not None:
+        counts = pd.DataFrame(columns=group_ids, data=counts, dtype=int)
+        cat.loc[:, group_ids] = cat.loc[:, group_ids].copy() + counts
+    cat.drop(cat.index[~mask], inplace=True)
 
 
 def merge_synth_cats(observed, model):
