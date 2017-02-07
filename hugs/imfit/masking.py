@@ -276,6 +276,7 @@ def make_mask(masked_image, thresh=1.5, backsize=50, backffrac=0.5,
 
     if gal_pos=='center':
         gal_x, gal_y = (img.shape[1]/2, img.shape[0]/2)
+        gal_pos = (gal_x, gal_y)
     else:
         gal_x, gal_y = gal_pos
 
