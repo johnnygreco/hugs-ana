@@ -45,7 +45,7 @@ def make_plot(subplots=None):
     a.set_ylim(-1.1, 1.6)
     a.set_xlim(-26,-4)
     a.set_ylabel(r'$\log_{10}(r_\mathrm{eff}\ [\mathrm{kpc}])$')
-    a.set_xlabel(r'Absolute $g$-band Magnitude')
+    a.set_xlabel(r'Absolute Magnitude')
     a.minorticks_on()
     a.invert_xaxis()
 
@@ -59,14 +59,15 @@ def make_plot(subplots=None):
     # add text to figure
     x, dx, y = -17.6, -1, 1.3
     fs = 15.5
-    a.text(-15.2, 1.05, r'28 mag arcsec$^{-2}$',rotation=rot, fontsize=fs, va='bottom')
+    a.text(-15.2, 1.05, r'28 mag arcsec$^{-2}$',
+           rotation=rot, fontsize=fs, va='bottom')
     a.text(x, y, '27',rotation=rot, fontsize=fs, va='bottom')
     a.text(x+dx, y, '26',rotation=rot, fontsize=fs, va='bottom')
     a.text(x+2*dx, y, '25',rotation=rot, fontsize=fs, va='bottom')
     a.text(x+3*dx, y, '24',rotation=rot,fontsize=fs, va='bottom') 
 
     a.text(-5.8, -.4, r'${\bf dSphs}$', color='gray', fontsize=20)
-    a.text(-10.3, .4, r'${\bf UDGs}$', color=cmap(0), fontsize=20)
+    a.text(-10.7, .55, r'${\bf UDGs}$', color=cmap(0), fontsize=20)
     a.text(-20.5, 1.05, r'${\bf gEs}$', color='gray', fontsize=20)
     a.text(-18, -.8, r'${\bf cEs}$', color='gray', fontsize=20)
     a.text(-14.1, -0.32, r'${\bf dEs}$', color='gray', fontsize=20)
@@ -76,59 +77,30 @@ def make_plot(subplots=None):
 
     return fig, a
 
-def get_candy(path, remove_duplicates=True):
+def get_candy(fn, remove_duplicates=True):
     from toolbox.astro import angsep
     from hugs.datasets import yang
     from toolbox.cosmo import Cosmology
     cosmo = Cosmology()
 
-    groups = yang.load_groups().to_pandas()
-    group_dirs = [os.path.join(path, g) for g in os.listdir(path) if g[:5]=='group']
-
-    df = []
-    for g in group_dirs:
-        cat_fn = os.path.join(g, 'imfit/candy-imfit-params.csv')
-        group_df = pd.read_csv(cat_fn)
-        group_id = int(g.split('-')[-1])
-        group_df['group_id'] = group_id
-        cols = ['ra', 'dec', 'z', 'Mh_Lest']
-        ra, dec, z, Mh = groups.loc[groups['group_id']==group_id, cols].values[0]
-        group_df['z'] = z
-        group_df['logMh'] = Mh
-        D_L, D_A = cosmo.D_L(z), cosmo.D_A(z)
-        group_df['D_A'] = D_A
-        group_df['D_L'] = D_L
-        group_df['r180'] = yang.r180(Mh, z)
-        group_df['cnum'] = np.arange(len(group_df))
-        theta = angsep(group_df['ra'], group_df['dec'], ra, dec, sepunits='radian')
-        group_df['r/r180'] =  theta*cosmo.D_A(z)/yang.r180(Mh, z)
-        df.append(group_df)
-    df = pd.concat(df, ignore_index=True)
-    df['r_kpc(g)'] = df['r_e(g)']*df['D_A']*u.arcsecond.to('radian')*1e3
+    df = pd.read_csv(fn)
+    cut = (df['candy']==1) & (df['ell']<0.6)
+    df = df[cut]
+    df['D_L'] = cosmo.D_L(df['z'])
     df['Mg'] = df['m_tot(g)'] - 5*np.log10(df['D_L']*1e6) + 5 
     df['Mi'] = df['m_tot(i)'] - 5*np.log10(df['D_L']*1e6) + 5 
-
-    suspect = np.load(os.path.join(path, 'suspect.npy'))
-    cut = (df['mu_0(g)']>23.8) & (df['r_kpc(g)']>1.5)
-    df_candy = df[cut].copy()
-    df_candy = df_candy[~suspect].copy()
-    df_candy.reset_index(inplace=True)
-
-    if remove_duplicates:
-        from hugs_pipe.cattools import remove_duplicates
-        remove_duplicates(df_candy)
-
-    return df_candy
+    return df
 
 if __name__=='__main__':
 
     savedir = os.path.join(os.environ.get('FIG_DIR'), 'paper-I')
 
-    path = os.path.join(os.environ.get('LOCAL_DATA'), 'hsc/stamps/candy/')
+    path = os.environ.get('HUGS_PIPE_IO')
+    fn = os.path.join(path, 'viz-inspect-results/viz-sample.csv')
     fig, ax = make_plot()
-    candy = get_candy(path) 
+    candy = get_candy(fn) 
 
-    ax.scatter(candy['Mg'], np.log10(candy['r_kpc(g)']), s=120, alpha=0.5, 
+    ax.scatter(candy['Mg'], np.log10(candy['r_kpc(g)']), s=120, alpha=0.4, 
                edgecolors='k', color=cmap(0), label='HSC UDGs (this work)')
 
     handles, labels = ax.get_legend_handles_labels()
