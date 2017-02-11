@@ -9,22 +9,25 @@ hscdir = os.path.join(os.environ.get('DATA_DIR'), 'hsc')
 __all__ = ['load_pointings', 'make_query_coordlist', 'cutout_query']
 
 
-def load_pointings(band='i'):
+def load_pointings(band='i', full=False):
     """
     Return the current HSC wide pointings in
     the given band.
     """
     from astropy.table import Table
-    fn = 'ObservedWidePointings.lst'  
+    fn = 'FullWidePointings.lst' if full else 'ObservedWidePointings.lst'  
     fn = os.path.join(hscdir, fn)
     ra = []
     dec = []
-    with open(fn) as file:
-        for line in iter(file):
-            data = line.split('|')
-            if data[1][-1]==band:
-                ra.append(float(data[2]))
-                dec.append(float(data[3]))
+    if full:
+        ra, dec = np.loadtxt(fn, delimiter='|', usecols=(1,2), unpack=True)
+    else:
+        with open(fn) as file:
+            for line in iter(file):
+                data = line.split('|')
+                if data[1][-1]==band:
+                    ra.append(float(data[2]))
+                    dec.append(float(data[3]))
     coords = Table([ra, dec], names=['ra', 'dec'])
     return coords
 
