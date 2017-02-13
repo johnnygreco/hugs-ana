@@ -31,7 +31,6 @@ def load_gals():
     fn = os.path.join(yangdir, 'yang_modelC_all.txt')
     members = Table.read(fn, format='ascii')
     members.remove_column('gal_id')
-    members.remove_column('vagc_id')
     members.sort('group_id')
     return members
 
