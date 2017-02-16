@@ -18,7 +18,7 @@ def load_groups():
     fn = os.path.join(yangdir, 'group_DR7/modelC_group')
     groups = np.loadtxt(fn, skiprows=3, usecols=(0,1,2,3,6,7))
     groups = Table([groups[:,i] for i in range(groups.shape[1])],
-                   names=('group_id', 'ra', 'dec', 'z', 'Mh_Lest', 'Mh_Mest'),
+                   names=('group_id', 'ra', 'dec', 'z', 'logMh_Lest', 'logMh_Mest'),
                    dtype=(int, 'f8', 'f8', 'f8', 'f8', 'f8'))
     return groups
 
